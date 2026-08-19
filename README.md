@@ -48,3 +48,12 @@ Claude Code's remote environment).
 Nothing in this repo can publish to Etsy directly — there's no Etsy API
 connector attached to this environment. Every product is built to the point
 of "upload and hit publish," but that last step is manual, by design.
+
+## Note on compiled files
+
+The compiled PDF/PNG outputs (the actual bundle PDF and listing thumbnail)
+are **not** committed to this repo — binary files can't reliably travel
+through the GitHub API push path used from this environment. They're
+regenerated in seconds from the HTML source with the two build scripts above.
+The finished files from the session that built this were delivered directly
+to the user as attachments.
