@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
+<style>
+  .cover { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; }
+  .frame { border: 1.5px solid var(--accent); width: 100%; height: 100%; position: absolute; top: 0.3in; left: 0.3in; right: 0.3in; bottom: 0.3in; width: calc(8.5in - 0.6in); height: calc(11in - 0.6in); }
+  .frame-inner { border: 0.5px solid var(--line); position: absolute; top: 0.38in; left: 0.38in; right: 0.38in; bottom: 0.38in; width: calc(8.5in - 0.76in); height: calc(11in - 0.76in); }
+  .brand { font-family: Georgia, serif; font-size: 15px; letter-spacing: 5px; text-transform: uppercase; color: var(--accent-dark); margin-bottom: 40px; }
+  .cover h1 { font-family: Georgia, serif; font-size: 46px; font-weight: normal; margin: 0 0 8px 0; color: var(--ink); }
+  .cover .rule { width: 90px; border-top: 1.5px solid var(--accent); margin: 16px 0; }
+  .cover .desc { font-size: 13px; color: var(--ink-soft); max-width: 4.6in; line-height: 1.7; margin-bottom: 36px; }
+  .contents { text-align: left; font-size: 12px; color: var(--ink); margin-top: 10px; }
+  .contents .item { display: flex; align-items: baseline; gap: 8px; margin-bottom: 9px; }
+  .contents .num { color: var(--accent); font-family: Georgia, serif; font-style: italic; }
+  .cover .foot { position: absolute; bottom: 0.7in; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="frame"></div>
+  <div class="frame-inner"></div>
+  <div class="cover">
+    <div class="brand">Balance &amp; Bloom</div>
+    <h1>The Budget &amp;<br>Savings Planner</h1>
+    <div class="rule"></div>
+    <div class="desc">A calm, low-ink printable system for tracking your income, expenses, debt payoff, and savings goals — designed to actually get used.</div>
+    <div class="contents">
+      <div class="item"><span class="num">01</span><span>Monthly Budget Tracker</span></div>
+      <div class="item"><span class="num">02</span><span>Debt Payoff Tracker</span></div>
+      <div class="item"><span class="num">03</span><span>Savings Goal Tracker</span></div>
+      <div class="item"><span class="num">04</span><span>Annual Bill Payment Tracker</span></div>
+      <div class="item"><span class="num">05</span><span>Weekly Expense Log</span></div>
+      <div class="item"><span class="num">06</span><span>How To Use This Planner</span></div>
+    </div>
+    <div class="foot">Printable &middot; Instant Download &middot; US Letter</div>
+  </div>
+</div>
+</body>
+</html>

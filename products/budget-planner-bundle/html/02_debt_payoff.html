@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
+<style>
+  .debt-block { border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; margin-bottom: 10px; background: var(--paper); }
+  .debt-head { display:flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; }
+  .debt-head b { font-family: Georgia, serif; font-size: 13px; color: var(--accent-dark); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="kicker">Balance &amp; Bloom <span class="leaf">&middot;</span> 02</div>
+  <h1 class="title">Debt Payoff Tracker</h1>
+  <div class="subtitle">Snowball or avalanche method &mdash; list smallest balance or highest interest rate first</div>
+  <hr class="header-rule">
+
+  <table>
+    <tr><th style="width:26%">Debt Name</th><th>Balance</th><th>Interest Rate</th><th>Min. Payment</th><th>Payoff Order</th></tr>
+    <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+  </table>
+
+  <div class="section-label">Payoff Progress &mdash; color one box per $50 paid off</div>
+
+  <div class="debt-block">
+    <div class="debt-head"><b>Debt 1</b><span>Starting balance: __________</span></div>
+    <div class="box-grid">
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+    </div>
+  </div>
+
+  <div class="debt-block">
+    <div class="debt-head"><b>Debt 2</b><span>Starting balance: __________</span></div>
+    <div class="box-grid">
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+    </div>
+  </div>
+
+  <div class="debt-block">
+    <div class="debt-head"><b>Debt 3</b><span>Starting balance: __________</span></div>
+    <div class="box-grid">
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+      <div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div><div class="box"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Balance &amp; Bloom Planner</span>
+    <span>For personal printing use only</span>
+  </div>
+</div>
+</body>
+</html>
