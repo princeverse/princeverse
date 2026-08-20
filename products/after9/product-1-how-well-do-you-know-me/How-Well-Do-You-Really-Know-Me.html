@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>How Well Do You Really Know Me? — After 9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #120e10;
+    --bg-2: #1c1417;
+    --bg-3: #241a1e;
+    --wine: #8a2332;
+    --wine-light: #b23a4a;
+    --gold: #c9a15a;
+    --cream: #f4ead9;
+    --cream-dim: #baac97;
+    --line: rgba(244,234,217,0.12);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Inter', -apple-system, sans-serif;
+    overscroll-behavior: none;
+  }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; min-height: 100dvh;
+    background-image:
+      radial-gradient(ellipse 800px 500px at 20% -10%, rgba(138,35,50,0.35), transparent),
+      radial-gradient(ellipse 700px 500px at 100% 110%, rgba(201,161,90,0.12), transparent);
+  }
+  .app {
+    width: 100%; max-width: 480px; height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+  .screen {
+    flex: 1; display: none; flex-direction: column;
+    padding: 32px 28px 28px 28px; overflow-y: auto;
+  }
+  .screen.active { display: flex; }
+
+  .kicker {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; text-align: center; margin-bottom: 6px;
+  }
+  h1.brand {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px;
+    letter-spacing: 4px; text-transform: uppercase; text-align: center;
+    color: var(--cream-dim); margin: 0 0 40px 0;
+  }
+
+  /* Cover */
+  #cover { justify-content: center; text-align: center; }
+  #cover .title {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 40px;
+    line-height: 1.15; color: var(--cream); margin: 0 0 14px 0;
+  }
+  #cover .tagline {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 18px; color: var(--gold); margin: 0 0 34px 0;
+  }
+  #cover .desc {
+    font-size: 14.5px; line-height: 1.6; color: var(--cream-dim);
+    margin: 0 0 40px 0; max-width: 360px; margin-left:auto; margin-right:auto;
+  }
+  .btn {
+    border: none; border-radius: 100px; padding: 16px 28px;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px;
+    letter-spacing: 0.5px; cursor: pointer; width: 100%;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--wine-light), var(--wine));
+    color: var(--cream);
+    box-shadow: 0 8px 24px rgba(138,35,50,0.35);
+  }
+  .btn-ghost {
+    background: transparent; color: var(--cream-dim);
+    border: 1px solid var(--line); margin-top: 12px;
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, #dcb96f, var(--gold));
+    color: #1c1417;
+    box-shadow: 0 8px 24px rgba(201,161,90,0.3);
+  }
+
+  /* Rules (collapsible on cover) */
+  #rulesBox {
+    display: none; text-align: left; background: var(--bg-2);
+    border: 1px solid var(--line); border-radius: 14px; padding: 20px 20px;
+    margin-top: 20px; font-size: 13.5px; line-height: 1.7; color: var(--cream-dim);
+  }
+  #rulesBox.open { display: block; }
+  #rulesBox ul { margin: 0; padding-left: 18px; }
+  #rulesBox li { margin-bottom: 8px; }
+  #rulesToggle { background:none; border:none; color: var(--gold); font-size: 13px; text-decoration: underline; cursor:pointer; margin-top: 4px; }
+
+  /* Round intro */
+  #roundIntro { justify-content: center; text-align: center; }
+  #roundIntro .roundNum {
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 1px solid var(--gold); color: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-size: 20px; margin: 0 auto 20px auto;
+  }
+  #roundIntro .roundName {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 30px;
+    color: var(--cream); margin: 0 0 16px 0;
+  }
+  #roundIntro .roundDesc {
+    font-size: 14.5px; line-height: 1.65; color: var(--cream-dim);
+    max-width: 340px; margin: 0 auto 36px auto;
+  }
+
+  /* Question card */
+  #game { justify-content: space-between; }
+  .topbar { display:flex; align-items:center; justify-content: space-between; margin-bottom: 8px; }
+  .roundLabel { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); font-weight:600; }
+  .progressText { font-size: 12px; color: var(--cream-dim); }
+  .progressTrack { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 34px; }
+  .progressFill { height: 100%; background: linear-gradient(90deg, var(--wine), var(--gold)); border-radius: 3px; transition: width 0.35s ease; }
+
+  .cardWrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .card {
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: 22px;
+    padding: 40px 26px; width: 100%; text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+  .card .qNum { font-size: 12px; color: var(--cream-dim); margin-bottom: 18px; letter-spacing: 1px; }
+  .card .qText {
+    font-family: 'Fraunces', serif; font-weight: 500; font-size: 23px;
+    line-height: 1.4; color: var(--cream);
+  }
+
+  .actions { display: flex; gap: 12px; margin-top: 28px; }
+  .actions .btn-ghost { margin-top: 0; flex: 0 0 auto; width: auto; padding: 16px 22px; }
+  .actions .btn-primary { flex: 1; }
+
+  /* End screen */
+  #end { justify-content: center; text-align: center; }
+  #end .title { font-family:'Fraunces', serif; font-weight:600; font-size: 30px; margin-bottom: 14px; }
+  #end .desc { font-size: 14.5px; line-height: 1.65; color: var(--cream-dim); margin-bottom: 30px; max-width: 340px; margin-left:auto; margin-right:auto; }
+  #end .cross { border-top: 1px solid var(--line); margin-top: 30px; padding-top: 26px; }
+  #end .cross p { font-size: 12.5px; color: var(--cream-dim); margin-bottom: 14px; }
+
+  .footNote { text-align:center; font-size: 11px; color: var(--cream-dim); opacity:0.7; margin-top: 18px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- COVER -->
+  <div class="screen active" id="cover">
+    <div class="kicker">After 9</div>
+    <h1 class="brand">After 9</h1>
+    <div class="title">How Well Do You<br>Really Know Me?</div>
+    <div class="tagline">Things get interesting after 9.</div>
+    <div class="desc">120 questions across four rounds — starting easy, ending exactly where you think it's going. Answer honestly, skip freely, and see how far the night goes.</div>
+    <button class="btn btn-primary" onclick="App.start()">Start Playing</button>
+    <button id="rulesToggle" onclick="App.toggleRules()">How to play</button>
+    <div id="rulesBox">
+      <ul>
+        <li>Sit facing each other. One phone or tablet, passed back and forth.</li>
+        <li>Decide who answers first — then alternate with every new question.</li>
+        <li>Answer out loud. No overthinking, no rehearsing.</li>
+        <li>You can skip any question, for any reason, with zero explanation needed.</li>
+        <li>Four rounds, thirty questions each. Each round gets a little more honest than the last.</li>
+        <li>There's no winning or losing — just how far you take it.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ROUND INTRO -->
+  <div class="screen" id="roundIntro">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="roundNum" id="riNum">1</div>
+      <div class="roundName" id="riName"></div>
+      <div class="roundDesc" id="riDesc"></div>
+      <button class="btn btn-primary" onclick="App.beginRound()">Begin Round</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="screen" id="game">
+    <div>
+      <div class="topbar">
+        <div class="roundLabel" id="gRoundLabel">Round 1 · You Should Know This</div>
+        <div class="progressText" id="gProgressText">1 / 30</div>
+      </div>
+      <div class="progressTrack"><div class="progressFill" id="gProgressFill" style="width:0%"></div></div>
+    </div>
+    <div class="cardWrap">
+      <div class="card">
+        <div class="qNum" id="gTurn">Partner A answers first</div>
+        <div class="qText" id="gQuestion">Loading…</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="App.skip()">Skip</button>
+      <button class="btn btn-primary" onclick="App.next()">Next Question</button>
+    </div>
+  </div>
+
+  <!-- ROUND END -->
+  <div class="screen" id="roundEnd">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+      <div class="roundNum" id="reNum">✓</div>
+      <div class="roundName" id="reTitle">Round 1 complete</div>
+      <div class="roundDesc" id="reDesc"></div>
+      <button class="btn btn-primary" onclick="App.nextRound()" id="reBtn">Continue to Round 2</button>
+    </div>
+  </div>
+
+  <!-- GAME END -->
+  <div class="screen" id="end">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="kicker">Game Complete</div>
+      <div class="title">That's After 9.</div>
+      <div class="desc">120 questions in, and you know each other a little better than you did an hour ago — in more ways than one. Play again anytime; the questions don't get old, even if the answers do.</div>
+      <button class="btn btn-gold" onclick="App.restart()">Play Again</button>
+      <div class="cross">
+        <p>Liked this one? Truth or Temptation and 7 Nights After 9 go further — and the full After 9 Collection bundles all three.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">After 9 · Play tasteful, play consensual, play together.</div>
+</div>
+
+<script>
+const AFTER9_GAME = {
+  title: "How Well Do You Really Know Me?",
+  rounds: [
+    { id:1, name:"You Should Know This", intro:"Warm-up round. Light, easy, a little funny — the stuff you should already know about each other.", questions: [
+"What's my go-to order at a coffee shop?","What's the one show I'll rewatch no matter what?","Am I a morning person or a night owl — really?","What's currently my most-used emoji?","What did I want to be when I was a kid?","What's my comfort food when I've had a rough day?","What's on my phone's lock screen right now?","What's my biggest pet peeve that I complain about most?","What's my karaoke song, whether I admit it or not?","What's the last thing I said I'd “do tomorrow” and still haven't?","What's my dream vacation, no budget involved?","What's a food I claim to hate but have never actually tried?","What's the first thing I do when I get home?","What's my go-to excuse to get out of something I don't want to do?","What's a song that instantly puts me in a good mood?","What side of the bed do I sleep on, and would I ever switch?","What's the last thing I Googled that I probably wouldn't want read out loud?","What's my “I'm getting sick” tell before I even notice it myself?","What's a skill I wish I had but have never actually tried to learn?","What's my order if we're splitting a pizza and I'm picking the toppings?","What's the one household task I will avoid for as long as humanly possible?","What's my go-to small talk topic with strangers?","What's something I always have in my bag or pockets?","What's a movie I can quote almost word for word?","What's my honest opinion on mornings before coffee?","What's the weirdest thing I've ever admitted to being afraid of?","What's my go-to order when I'm too tired to decide anything?","What's a compliment I give other people all the time?","What's something I do when I think no one's watching?","What's one thing about me that surprised you in the first month we knew each other?"
+]},
+    { id:2, name:"Be Honest", intro:"Getting warmer. This round is about us — how you love, how you're loved, and what usually goes unsaid.", questions: [
+"What's a moment you knew this was becoming serious?","What do you think is my best quality — the one you'd brag about?","What's something I do that you don't think I realize means a lot to you?","What's a memory of us you find yourself replaying?","When do you feel most loved by me?","What's something you've forgiven me for that we never really talked through?","What's a fear you've had about us that you haven't said out loud?","What do you think I underestimate about myself?","What's a compliment you wish I gave you more often?","What's something about how I show love that took you time to understand?","What's a moment you felt completely seen by me?","What do you think is the hardest part of loving someone like me?","What's something small I do that you'd genuinely miss if it stopped?","What's a version of yourself you feel like I bring out?","What's something you've never told me about how you felt when we met?","What do you think I need to hear more, even if I don't ask for it?","What's a moment you felt closest to me, even without saying anything?","What's something you think I do better than I give myself credit for?","What's a fight or hard moment that actually made us stronger?","What do you think has changed most about how you love me since we started?","What's something you're proud of us for getting through together?","What's a way I've supported you that you don't think I know mattered?","What do you think I'm most afraid of losing?","What's a habit of mine that used to bother you and now you'd miss?","What's something you wish we talked about more often?","What's a moment you felt like a team, no explanation needed?","What do you think I'd say is my biggest fear about us?","What's a way you think I've grown since we've been together?","What's something you've never had to ask me for, because I just do it?","If you had to describe what “us” feels like in one sentence, what would it be?"
+]},
+    { id:3, name:"Don't Overthink It", intro:"No overthinking, no rehearsed answers — first instinct only. Attraction, chemistry, and a few things you've never said out loud.", questions: [
+"What's the first thing you noticed about me — physically, before anything else?","When do you find me most attractive: right when I wake up, dressed up, or mid-laugh?","Has there ever been someone in my orbit you were a little jealous of?","What's a moment the tension between us was impossible to ignore?","What's something I do without realizing it that you find irresistible?","Is there an outfit of mine you secretly hope makes a comeback?","What's a version of me — earlier in us — you sometimes miss?","What's a secret you've kept just to avoid an argument?","Who would you trust me around the least, honestly?","What's the boldest thing you've thought about saying to me but held back?","Do you still think about our first kiss?","What's something about the way I talk to you that gets to you every time?","What's a moment you caught yourself staring at me and hoped I didn't notice?","What's something I do that you'd never admit turns you on a little?","Has jealousy ever made you realize how much you actually wanted this?","What's a text or message from me you've reread more than once?","What's something about my confidence — or lack of it — that pulls you in?","Is there a memory of us that still makes your stomach flip a little?","What's a compliment about me you've said to other people but not to my face?","What's the most honest answer to: do you think about me during the day?","What's something I wear — or don't wear — that you have strong opinions about?","What's a moment you felt genuinely competitive for my attention?","What's the real reason you remember our first real conversation so clearly?","What's something small — a look, a laugh, a moment — that hooked you early on?","Is there a “what if” from before us you still think about occasionally?","What's something about my personality that's more attractive to you than my looks?","What's a moment you felt proud to be the one standing next to me?","What's the closest you've come to telling me something you were nervous to say?","What's something about tonight, specifically, that you're curious about?","On a scale that has nothing to do with looks, how would you rate our chemistry right now — and why?"
+]},
+    { id:4, name:"After 9", intro:"You've made it. This is the last round — and it's exactly what it sounds like. Answer honestly, skip freely, and see where it goes.", questions: [
+"What's one thing you've always wanted to try with me but haven't brought up?","If tonight had zero interruptions and zero rules, what's the first thing you'd want to happen?","What's a compliment about my body you don't say often enough?","Where's somewhere unexpected you'd want to be kissed right now?","What's a memory of us that still gets you a little worked up when you think about it?","If you could set the mood for exactly how tonight goes, what's the first move?","What's something about the way I look at you that makes it hard to concentrate?","What's one thing you find yourself thinking about us that you've never said out loud?","What's your honest answer: are you thinking about tonight right now, or already?","What's a detail about me — voice, hands, whatever — that gets to you more than you'd admit?","If we skipped the rest of this game right now, what would you want to do instead?","What's something you've imagined about us that felt a little too bold to say out loud?","Rate our chemistry tonight, 1 to 10 — and tell me exactly what's earning that number.","What's one thing I could whisper right now that would completely derail this game?","What's the most honest answer to: what do you want from me after this question?","What's a “someday” fantasy involving us you've never actually said out loud?","What's something about tonight specifically that's got your attention more than usual?","If I asked you to describe exactly how you want the rest of the night to go, what would you say?","What's a compliment you've been holding back because it felt like too much?","What's the boldest thing you'd do right now if I said “no rules for the next hour”?","What's a memory from tonight already that you know you'll be thinking about later?","What's something you want me to do the second this game ends?","What's the truest answer to: are you more interested in finishing this round, or finishing it later?","What's one thing about being with me tonight that feels different from any other night?","If this were the last question of the night, what would you want to happen next?","What's something you've wanted to say all night but kept saving for exactly this round?","What's a version of tonight you've already been picturing before we even got here?","What's the one thing standing between us and skipping straight to dessert?","Last question, no overthinking: in one sentence, how do you want tonight to end?","Set the tone for the rest of the night in five words or less. Go."
+]}
+  ]
+};
+
+const App = (() => {
+  let roundIdx = 0, qIdx = 0;
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function toggleRules() {
+    document.getElementById('rulesBox').classList.toggle('open');
+  }
+
+  function start() {
+    roundIdx = 0; qIdx = 0;
+    showRoundIntro();
+  }
+
+  function showRoundIntro() {
+    const r = AFTER9_GAME.rounds[roundIdx];
+    document.getElementById('riNum').textContent = r.id;
+    document.getElementById('riName').textContent = r.name;
+    document.getElementById('riDesc').textContent = r.intro;
+    show('roundIntro');
+  }
+
+  function beginRound() {
+    qIdx = 0;
+    renderQuestion();
+    show('game');
+  }
+
+  function renderQuestion() {
+    const r = AFTER9_GAME.rounds[roundIdx];
+    const total = r.questions.length;
+    document.getElementById('gRoundLabel').textContent = `Round ${r.id} · ${r.name}`;
+    document.getElementById('gProgressText').textContent = `${qIdx+1} / ${total}`;
+    document.getElementById('gProgressFill').style.width = `${((qIdx+1)/total)*100}%`;
+    document.getElementById('gQuestion').textContent = r.questions[qIdx];
+    document.getElementById('gTurn').textContent = (qIdx % 2 === 0) ? 'Partner A answers first' : 'Partner B answers first';
+  }
+
+  function advance() {
+    const r = AFTER9_GAME.rounds[roundIdx];
+    if (qIdx < r.questions.length - 1) {
+      qIdx++;
+      renderQuestion();
+    } else {
+      showRoundEnd();
+    }
+  }
+
+  function next() { advance(); }
+  function skip() { advance(); }
+
+  function showRoundEnd() {
+    const r = AFTER9_GAME.rounds[roundIdx];
+    const isLast = roundIdx === AFTER9_GAME.rounds.length - 1;
+    document.getElementById('reNum').textContent = '✓';
+    if (isLast) {
+      show('end');
+      return;
+    }
+    const next = AFTER9_GAME.rounds[roundIdx+1];
+    document.getElementById('reTitle').textContent = `Round ${r.id} complete`;
+    const teaser = {
+      2: "Round 2 is about to get more honest.",
+      3: "Round 3 stops being polite.",
+      4: "Round 4 is After 9. You know what that means."
+    }[next.id] || "Ready for the next round?";
+    document.getElementById('reDesc').textContent = teaser;
+    document.getElementById('reBtn').textContent = `Continue to Round ${next.id}`;
+    show('roundEnd');
+  }
+
+  function nextRound() {
+    roundIdx++;
+    showRoundIntro();
+  }
+
+  function restart() {
+    roundIdx = 0; qIdx = 0;
+    show('cover');
+  }
+
+  return { start, toggleRules, beginRound, next, skip, nextRound, restart };
+})();
+</script>
+</body>
+</html>
