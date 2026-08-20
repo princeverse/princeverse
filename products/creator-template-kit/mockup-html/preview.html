@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --ink: #3f3a34; --accent: #7c8f6e; --accent-dark: #56634a;
+    --bg: #f8f4ec; --gold: #c8a24a; --line: #cfc7b4; --placeholder: #e7e1d3;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Calibri, Arial, sans-serif; }
+  .card { width: 600px; height: 600px; position: relative; overflow: hidden; }
+  .badge { position:absolute; top:28px; left:28px; width:34px; height:34px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold; }
+  .kicker { position:absolute; top:36px; left:76px; font-size:11px; letter-spacing:2px; color:var(--accent-dark); font-weight:bold; }
+
+  /* Quote card */
+  #quote { background: var(--bg); display:flex; align-items:center; justify-content:center; text-align:center; }
+  #quote .q { font-family: Georgia, serif; font-style:italic; font-size:30px; color:var(--ink); line-height:1.35; width:460px; }
+  #quote .handle { position:absolute; bottom:36px; width:100%; text-align:center; font-size:13px; font-weight:bold; letter-spacing:1px; color:var(--accent-dark); }
+
+  /* Tips card */
+  #tips { background: #fff; padding: 90px 50px 0 50px; }
+  #tips h1 { font-family: Georgia, serif; font-weight:normal; font-size:34px; color:var(--ink); margin:20px 0 40px 0; line-height:1.2; }
+  #tips .row { display:flex; align-items:flex-start; gap:16px; margin-bottom:34px; }
+  #tips .num { width:34px; height:34px; border-radius:50%; background:var(--gold); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0; }
+  #tips .row h2 { font-size:17px; margin:0 0 4px 0; color:var(--ink); }
+  #tips .row p { font-size:13px; margin:0; color:var(--accent-dark); }
+
+  /* Brand kit card */
+  #brand { background: var(--bg); padding: 90px 50px 0 50px; }
+  #brand h1 { font-size:15px; color:var(--ink); margin-bottom:14px; }
+  #brand .swatches { display:flex; gap:14px; margin-bottom:40px; }
+  #brand .sw { width:70px; height:70px; border-radius:8px; border:1px solid var(--line); }
+  #brand .headline { font-family: Georgia, serif; font-size:26px; color:var(--ink); margin-bottom:6px; }
+  #brand .body { font-size:15px; color:var(--ink); margin-bottom:30px; }
+  #brand .chips { display:flex; gap:10px; }
+  #brand .chip { border:1px solid var(--accent); border-radius:20px; padding:8px 16px; font-size:12px; color:var(--accent-dark); background:#fff; }
+</style>
+</head>
+<body>
+<div class="card" id="quote">
+  <div class="badge">01</div><div class="kicker">QUOTE POST</div>
+  <div class="q">&ldquo;Your quote or caption goes right here &mdash; swap this text for your own words.&rdquo;</div>
+  <div class="handle">@youraccount</div>
+</div>
+
+<div class="card" id="tips">
+  <div class="badge">03</div><div class="kicker">TIPS POST</div>
+  <h1>3 Tips For<br>[Your Topic]</h1>
+  <div class="row"><div class="num">1</div><div><h2>Tip headline one</h2><p>One or two lines expanding on the tip.</p></div></div>
+  <div class="row"><div class="num">2</div><div><h2>Tip headline two</h2><p>One or two lines expanding on the tip.</p></div></div>
+  <div class="row"><div class="num">3</div><div><h2>Tip headline three</h2><p>One or two lines expanding on the tip.</p></div></div>
+</div>
+
+<div class="card" id="brand">
+  <div class="badge">08</div><div class="kicker">BRAND KIT</div>
+  <h1 style="margin-top:16px; font-weight:bold;">Color Palette</h1>
+  <div class="swatches">
+    <div class="sw" style="background:#3f3a34"></div>
+    <div class="sw" style="background:#7c8f6e"></div>
+    <div class="sw" style="background:#56634a"></div>
+    <div class="sw" style="background:#c8a24a"></div>
+    <div class="sw" style="background:#f8f4ec"></div>
+  </div>
+  <div class="headline">Headline — Cambria</div>
+  <div class="body">Body — Calibri</div>
+  <div class="chips">
+    <div class="chip">calm</div><div class="chip">warm</div><div class="chip">honest</div>
+  </div>
+</div>
+</body>
+</html>
