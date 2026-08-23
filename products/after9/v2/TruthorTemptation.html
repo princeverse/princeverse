@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Truth or Temptation — After.9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #120e10; --bg-2: #1c1417; --bg-3: #241a1e;
+    --wine: #8a2332; --wine-light: #b23a4a; --gold: #c9a15a;
+    --cream: #f4ead9; --cream-dim: #baac97; --line: rgba(244,234,217,0.14);
+    --focus: #e7c78a;
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-l: env(safe-area-inset-left, 0px);
+    --safe-r: env(safe-area-inset-right, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--cream);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overscroll-behavior: none;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; min-height: 100dvh;
+    background-image:
+      radial-gradient(ellipse 800px 500px at 100% -10%, rgba(138,35,50,0.32), transparent),
+      radial-gradient(ellipse 700px 500px at 0% 110%, rgba(201,161,90,0.10), transparent);
+  }
+  .app {
+    width: 100%; max-width: 480px; height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+    padding-top: var(--safe-t); padding-bottom: var(--safe-b);
+  }
+  .screen {
+    flex: 1; min-height: 0; display: none; flex-direction: column;
+    padding: clamp(18px,4vw,32px) max(20px, calc(var(--safe-l) + 16px)) 0 max(20px, calc(var(--safe-r) + 16px));
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.active { display: flex; }
+
+  .kicker { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); font-weight: 600; text-align: center; margin-bottom: 6px; }
+  h1.brand { font-family:'Fraunces',serif; font-weight:600; font-size:14px; letter-spacing:4px; text-transform:uppercase; text-align:center; color:var(--cream-dim); margin:0 0 clamp(24px,6vw,40px) 0; }
+
+  #cover { justify-content: center; text-align: center; }
+  #cover .title { font-family:'Fraunces',serif; font-weight:600; font-size: clamp(30px, 9vw, 42px); line-height:1.12; color: var(--cream); margin:0 0 14px 0; overflow-wrap: break-word; }
+  #cover .tagline { font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size: clamp(14px,3.6vw,16px); color: var(--gold); margin:0 0 26px 0; }
+  #cover .desc { font-size: clamp(13px,3.6vw,14.5px); line-height:1.6; color: var(--cream-dim); margin:0 0 30px 0; max-width:360px; margin-left:auto; margin-right:auto; }
+
+  .btn {
+    border: none; border-radius: 100px; padding: 16px 24px;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: clamp(13px,3.6vw,14.5px);
+    letter-spacing: 0.3px; cursor: pointer; width: 100%;
+  }
+  .btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .btn-primary { background: linear-gradient(135deg, var(--wine-light), var(--wine)); color: var(--cream); box-shadow: 0 8px 24px rgba(138,35,50,0.35); }
+  .btn-ghost { background: transparent; color: var(--cream-dim); border: 1px solid var(--line); }
+  .btn-gold { background: linear-gradient(135deg, #dcb96f, var(--gold)); color: #1c1417; box-shadow: 0 8px 24px rgba(201,161,90,0.3); }
+  #toggles { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+  #toggles button, #toggles .linkBtn { flex: 1 1 auto; min-width: 0; }
+  .linkBtn { background:none; border:none; color: var(--gold); font-size: 13px; text-decoration: underline; cursor: pointer; padding: 8px 4px; }
+  .linkBtn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+  #infoBox { display:none; text-align:left; background:var(--bg-2); border:1px solid var(--line); border-radius:14px; padding:18px; margin-top:16px; font-size:13px; line-height:1.7; color:var(--cream-dim); }
+  #infoBox.open { display:block; }
+  #infoBox h3 { font-family:'Fraunces',serif; font-size:15px; color:var(--cream); margin:0 0 8px 0; }
+  #infoBox h3.second { margin-top:16px; }
+  #infoBox ul { margin:0; padding-left:18px; }
+  #infoBox li { margin-bottom:6px; }
+  .consentLine { font-size:12.5px; color:var(--gold); text-align:center; margin-top:16px; line-height:1.6; }
+
+  .scoreRow { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; flex-wrap: wrap; }
+  .scoreChip { background:var(--bg-2); border:1px solid var(--line); border-radius:100px; padding:6px 14px; font-size:12px; color:var(--cream-dim); }
+  .scoreChip b { color:var(--gold); }
+
+  .heatRow { display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom: clamp(14px,4vw,22px); flex-wrap:nowrap; }
+  .heatLabel { font-size: 10.5px; letter-spacing:1.3px; text-transform:uppercase; color:var(--gold); font-weight:600; margin-right:6px; white-space:nowrap; }
+  .flame { width:7px; height:7px; border-radius:50%; background:var(--line); flex-shrink:0; }
+  .flame.on { background:var(--wine-light); }
+
+  .progressTrack { height:3px; background:var(--line); border-radius:3px; overflow:hidden; margin-bottom: clamp(14px,4vw,20px); }
+  .progressFill { height:100%; background:linear-gradient(90deg,var(--wine),var(--gold)); border-radius:3px; transition: width 0.35s ease; }
+  @media (prefers-reduced-motion: reduce) { .progressFill { transition: none; } }
+
+  #choice { justify-content:center; }
+  #choice .prompt { font-family:'Fraunces',serif; font-size: clamp(18px,5vw,22px); text-align:center; color:var(--cream); margin-bottom:6px; }
+  #choice .sub { font-size: clamp(11.5px,3vw,13px); text-align:center; color:var(--cream-dim); margin-bottom: clamp(24px,6vw,40px); }
+  .choiceRow { display:flex; gap: clamp(10px,3vw,14px); flex:1; align-items:stretch; min-width:0; }
+  .choiceBtn {
+    flex: 1 1 0; min-width: 0; border-radius:20px; border:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    cursor:pointer; padding: clamp(16px,4vw,20px) 8px; gap:8px;
+    font-family:'Inter',sans-serif; color:var(--cream);
+  }
+  .choiceBtn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  #btnTruth { background: var(--bg-2); }
+  #btnTemptation { background: linear-gradient(160deg, var(--bg-3), var(--wine)); }
+  .choiceBtn .label { font-family:'Fraunces',serif; font-size: clamp(18px,5vw,22px); }
+  .choiceBtn .desc { font-size: clamp(10.5px,2.8vw,11.5px); color:var(--cream-dim); text-align:center; }
+
+  #reveal { justify-content:space-between; }
+  #reveal .revealHead { text-align:center; margin-bottom:6px; }
+  #reveal .catLabel { font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+  .catLabel.truth { color:var(--gold); }
+  .catLabel.temptation { color:var(--wine-light); }
+  .cardWrap { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding: 8px 0; }
+  .card { background:var(--bg-2); border:1px solid var(--line); border-radius:22px; padding: clamp(24px,6vw,40px) clamp(18px,5vw,26px); width:100%; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.4); }
+  .card .qText { font-family:'Fraunces',serif; font-weight:500; font-size: clamp(17px,4.6vw,21px); line-height:1.4; color:var(--cream); overflow-wrap: break-word; }
+  .actions { display:flex; gap:10px; margin-top: clamp(16px,4vw,24px); flex-wrap: wrap; }
+  .actions .btn-ghost { flex: 1 1 100px; min-width: 90px; }
+  .actions .btn-primary { flex: 2 1 160px; min-width: 140px; }
+  #endGameLink { text-align:center; margin-top:12px; padding-bottom: 8px; }
+
+  #end { justify-content:center; text-align:center; }
+  #end .title { font-family:'Fraunces',serif; font-weight:600; font-size: clamp(24px,6.5vw,30px); margin-bottom:14px; }
+  #end .desc { font-size: clamp(13px,3.6vw,14.5px); line-height:1.65; color:var(--cream-dim); margin-bottom:22px; max-width:340px; margin-left:auto; margin-right:auto; }
+  #end .finalScore { font-family:'Fraunces',serif; font-size: clamp(32px,9vw,40px); color:var(--gold); margin-bottom:6px; }
+  #end .finalScoreLabel { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom: 26px; }
+  #end .cross { border-top:1px solid var(--line); margin-top:22px; padding-top:20px; }
+  #end .cross p { font-size:12.5px; color:var(--cream-dim); margin-bottom:14px; }
+
+  .footNote {
+    flex-shrink: 0; text-align:center; font-size:10.5px; color:var(--cream-dim); opacity:0.75;
+    padding: 10px max(20px, calc(var(--safe-l) + 16px)) calc(10px + var(--safe-b)) max(20px, calc(var(--safe-r) + 16px));
+    border-top: 1px solid var(--line);
+  }
+
+  .modalOverlay {
+    position: fixed; inset: 0; background: rgba(8,6,7,0.72); display: none;
+    align-items: center; justify-content: center; z-index: 20; padding: 24px;
+  }
+  .modalOverlay.open { display: flex; }
+  .modalBox { background: var(--bg-2); border: 1px solid var(--line); border-radius: 18px; padding: 26px 22px; max-width: 340px; width: 100%; text-align: center; }
+  .modalBox h3 { font-family:'Fraunces',serif; font-size: 19px; margin: 0 0 10px 0; color: var(--cream); }
+  .modalBox p { font-size: 13px; color: var(--cream-dim); line-height: 1.6; margin: 0 0 20px 0; }
+  .modalActions { display: flex; gap: 10px; }
+  .modalActions .btn { padding: 13px 16px; font-size: 13px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- COVER -->
+  <div class="screen active" id="cover">
+    <div class="kicker">After.9</div>
+    <div class="title">Truth or<br>Temptation</div>
+    <div class="tagline">Choose carefully. Both options escalate.</div>
+    <div class="desc">100 prompts. Every turn, pick Truth or Temptation. Answer honestly or take the invitation — either way, the night gets warmer with every round.</div>
+    <button class="btn btn-primary" onclick="App.startFresh()">Start Playing</button>
+    <div id="toggles">
+      <button class="btn btn-ghost" onclick="App.startFresh(true)">Play with scoring</button>
+      <button class="linkBtn" onclick="App.toggleInfo()">Setup &amp; rules</button>
+    </div>
+    <div id="infoBox">
+      <h3>Suggested Setup</h3>
+      <ul>
+        <li>Two drinks, low light, phones face-down except this one.</li>
+        <li>Sit close enough to touch — a couch or the edge of a bed works better than a table.</li>
+        <li>Give yourselves at least 30 uninterrupted minutes.</li>
+      </ul>
+      <h3 class="second">How to Play</h3>
+      <ul>
+        <li>Each turn, one partner chooses Truth or Temptation. Alternate who chooses.</li>
+        <li>Truth: answer the prompt honestly, out loud.</li>
+        <li>Temptation: an invitation to try something together — never an instruction either of you has to follow.</li>
+        <li>Every prompt can be skipped, for any reason, with no explanation needed.</li>
+        <li>A Temptation can always be exchanged for a Truth instead.</li>
+        <li>The game escalates automatically in three stages, ending at "After.9" — the warmest tier.</li>
+        <li>Scoring is optional: Temptation is worth 2 points, Truth is worth 1, tracked together as one shared score.</li>
+      </ul>
+      <div class="consentLine">Everything here is optional. Either of you can pause, change course, or stop at any point — silence or hesitation is never a yes.</div>
+    </div>
+  </div>
+
+  <!-- RESUME -->
+  <div class="screen" id="resumeScreen">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+      <div class="kicker">After.9</div>
+      <div class="title" style="font-size: clamp(24px,6.5vw,30px);">Welcome back</div>
+      <div class="desc" id="resumeDesc">You have a game in progress.</div>
+      <button class="btn btn-primary" onclick="App.resume()">Resume Game</button>
+      <button class="btn btn-ghost" style="margin-top:12px;" onclick="App.confirmStartOver()">Start Over</button>
+    </div>
+  </div>
+
+  <!-- CHOICE -->
+  <div class="screen" id="choice">
+    <div class="scoreRow" id="scoreRowChoice"></div>
+    <div class="heatRow">
+      <span class="heatLabel" id="heatLabel">Level 1 · Warm Up</span>
+      <span class="flame" id="f1"></span><span class="flame" id="f2"></span><span class="flame" id="f3"></span>
+    </div>
+    <div class="progressTrack"><div class="progressFill" id="levelProgressFill" style="width:0%"></div></div>
+    <div class="prompt">Truth or Temptation?</div>
+    <div class="sub">Whoever's turn it is, choose now.</div>
+    <div class="choiceRow">
+      <button class="choiceBtn" id="btnTruth" onclick="App.choose('truth')">
+        <span class="label">Truth</span>
+        <span class="desc">Answer honestly, out loud</span>
+      </button>
+      <button class="choiceBtn" id="btnTemptation" onclick="App.choose('temptation')">
+        <span class="label">Temptation</span>
+        <span class="desc">An invitation to try</span>
+      </button>
+    </div>
+    <div id="endGameLink"><button class="linkBtn" onclick="App.confirmEndGame()">End the game here</button></div>
+  </div>
+
+  <!-- REVEAL -->
+  <div class="screen" id="reveal">
+    <div class="revealHead"><div class="catLabel" id="rCatLabel">TRUTH</div></div>
+    <div class="cardWrap"><div class="card"><div class="qText" id="rText">Loading…</div></div></div>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="App.skip()">Skip</button>
+      <button class="btn btn-primary" onclick="App.done()">Done — Next Turn</button>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div class="screen" id="end">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="kicker">Game Complete</div>
+      <div class="title">That's Truth or Temptation.</div>
+      <div id="scoreBlock" style="display:none;">
+        <div class="finalScore" id="finalScoreNum">0</div>
+        <div class="finalScoreLabel">Shared Score</div>
+      </div>
+      <div class="desc" id="endDesc">However far you took it, you took it together.</div>
+      <button class="btn btn-gold" onclick="App.confirmStartOver(true)">Play Again</button>
+    </div>
+  </div>
+
+  <div class="footNote">After.9 &middot; Play tasteful, play consensual, play together.</div>
+</div>
+
+<!-- Confirmation modal (Start Over / End Game) -->
+<div class="modalOverlay" id="modalOverlay">
+  <div class="modalBox">
+    <h3 id="modalTitle">Start over?</h3>
+    <p id="modalBody">This clears your current progress and score.</p>
+    <div class="modalActions">
+      <button class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modalConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Prompt banks. Every prompt is a mutual invitation, not an
+   instruction — see PRODUCT_NOTES.md / QA_REPORT.md for the
+   consent-language pass this deck went through.
+   ============================================================ */
+const DECK = {
+  truth: {
+    1: [
+      "What's the most embarrassing thing you've done to get someone's attention?",
+      "What's a lie you told your parents that you never got caught for?",
+      "What's the pettiest thing that's ever made you laugh at yourself in hindsight?",
+      "What's your most irrational fear?",
+      "What's the last thing you exaggerated about, even a small thing?",
+      "What's a nickname you've been called that you secretly hate?",
+      "What's the most trouble you got into as a kid?",
+      "What's something you pretend to like but secretly don't?",
+      "What's your most memorable bad date story, from before us?",
+      "What's the smallest white lie you've told me?",
+      "What's something you've never admitted to being bad at?",
+      "What's a rumor about you that turned out to be true?",
+      "What's the most embarrassing song on your playlist right now?",
+      "What's something you do that you'd laugh off if I brought it up in front of friends?",
+      "What's the most unexpected thing you find attractive in a person?",
+      "What's the boldest opening line you've ever used, even if it didn't land?",
+      "What's something you say about me to your friends that you've never said to my face?"
+    ],
+    2: [
+      "What's the real reason you said yes to that first date with me?",
+      "What's something about our first few weeks together you've never told me?",
+      "Who was the last person you had a crush on before me?",
+      "What's a moment you felt a flicker of jealousy and never mentioned it?",
+      "When have you felt most drawn to me, and what was happening?",
+      "What's a compliment about yourself that you secretly agree with?",
+      "What's something I do that instantly puts you in a good mood?",
+      "What's the boldest message you've ever sent someone?",
+      "What's the moment you knew you wanted to kiss me, before it happened?",
+      "What's something physical about me you noticed before anything else?",
+      "How honest can you be about whether you think of me during the day?",
+      "What's a memory of us you'd replay if you could relive one moment?",
+      "What's something you catch yourself doing just to get my attention?",
+      "What's the real reason behind the last time you dressed up for me?",
+      "What's a compliment from me you still think about?",
+      "What's the closest you've come to saying something bold to me and didn't?",
+      "What's something about tonight you're already looking forward to?"
+    ],
+    3: [
+      "What's the last thing you thought about right before falling asleep last night?",
+      "What's a fantasy involving us you've never said out loud?",
+      "When did you last feel a wave of attraction to me, out of nowhere?",
+      "What's one thing about tonight you're hoping happens?",
+      "Where haven't I kissed you that you'd love me to?",
+      "What's something you'd want me to whisper to you right now?",
+      "Are you thinking about later already — honestly?",
+      "What's one small thing that would make the rest of tonight feel unforgettable?",
+      "What's a memory of us that still makes you smile in a very specific way?",
+      "What's the boldest compliment you'd give me right now, if you let yourself?",
+      "What's something about the way I look at you that gets under your skin, in a good way?",
+      "What's one thing you've been holding back all night that you want to say now?",
+      "If you could set the mood for exactly how the rest of tonight goes, what's the first move?",
+      "What's a detail about tonight — the light, the music, the closeness — that you want to remember?",
+      "What's the truest answer to: do you want this game to keep going, or something else?",
+      "What's something you find yourself noticing about me more than usual tonight?",
+      "What's one word you'd use to describe the energy between us right now?",
+      "What's a touch — a hand, a hug, anything — you'd want more of tonight?",
+      "What's something you've imagined us doing together that you've never brought up?",
+      "Last one, no overthinking: what do you want, right now, from the rest of tonight?"
+    ]
+  },
+  temptation: {
+    1: [
+      "Do your best impression of how your partner acts when they're annoyed.",
+      "Give your partner a genuine, specific compliment — no generic ones allowed.",
+      "Recreate the face you made on your first date, if you can remember it.",
+      "Sing the chorus of a song that reminds you of your partner.",
+      "Show off your best playful runway walk across the room.",
+      "Whisper the nicest thing you can think of about your partner right now.",
+      "Feed your partner a bite of something, if they're up for it.",
+      "Offer your partner a short shoulder or hand massage, if they'd like one.",
+      "Slow dance for 30 seconds — no music required, hum if you have to.",
+      "Write a two-word 'headline' describing your partner and read it out loud.",
+      "Hold eye contact with your partner for 30 seconds and see who smiles first.",
+      "Repeat your partner's favorite compliment back to them, in your own words.",
+      "Trade seats and sit a little closer for the next round.",
+      "Give your partner a playful nickname for the rest of the night.",
+      "Describe your partner in three words, out loud, first thing that comes to mind.",
+      "Let your partner pick your next drink or snack.",
+      "Take a photo of the two of you right now, no matter how you look."
+    ],
+    2: [
+      "If you're both into it, kiss your partner somewhere other than the lips.",
+      "Whisper something you find attractive about your partner in their ear.",
+      "Hold your partner's hand and see how long the moment lasts.",
+      "Give your partner a slow, appreciative look and tell them what you notice.",
+      "If you'd both enjoy it, trade one item of clothing for the next few turns.",
+      "If it feels right, sit closer than you have all game — even in your partner's lap.",
+      "Whisper your favorite memory of the two of you together.",
+      "Give your partner a lingering hug and see who lets go first.",
+      "Trace a word on your partner's arm or back and have them guess it.",
+      "Tell your partner exactly what you were thinking the last time you found them attractive.",
+      "If you're both up for it, kiss your partner like it's the first time all over again.",
+      "Ask your partner where they'd like you to sit for the rest of the game.",
+      "Whisper one thing you'd enjoy doing together later tonight.",
+      "Give your partner a genuine compliment about something you're drawn to physically.",
+      "Move a little closer and stay there for the rest of this level, if that sounds good to you both.",
+      "Share a slow kiss — no rushing, however long feels right to both of you.",
+      "Tell your partner the exact moment tonight you started noticing them differently."
+    ],
+    3: [
+      "If you're both into it, kiss your partner somewhere you haven't tonight.",
+      "Whisper what you'd like to happen after this game ends.",
+      "If you're both comfortable with it, take off one item of clothing — your choice which.",
+      "If you both want to, let your partner choose one item you're comfortable removing.",
+      "If your partner's open to it, give them a slow kiss on the neck.",
+      "Whisper the boldest thing you're willing to say out loud right now.",
+      "Offer to swap your next Truth for a Temptation, and see what your partner picks.",
+      "Ask your partner if they'd like to set the pace for the next five minutes.",
+      "Share a slow kiss, for as long as feels good to both of you.",
+      "Whisper one thing you'd like your partner to do for you tonight.",
+      "If you're both up for it, turn off the lights for the next round and stay close.",
+      "Ask your partner what pace they'd like the rest of the night to take.",
+      "Offer to do something small for your partner in the next sixty seconds — their call what.",
+      "If you're both into it, kiss your partner somewhere neither of you has tonight.",
+      "Whisper your partner's name the way you'd say it if no one else could hear.",
+      "Suggest ending the game here — and see what you both want to do instead."
+    ]
+  }
+};
+
+const LEVEL_NAMES = { 1: "Warm Up", 2: "Heating Up", 3: "After.9" };
+const LEVEL_UP_AT = { 1: 12, 2: 24 };
+const STORAGE_KEY = "after9_truth_or_temptation_v1";
+
+const App = (() => {
+  let level = 1, turns = 0, score = 0, scoringOn = false;
+  let pools = {};       // remaining (unshuffled-drawn) indices per category/level
+  let usedFlat = {};    // "category:level:index" -> true, for lifetime-of-session no-repeat tracking
+  let currentCategory = null;
+  let currentIdx = null;
+  let pendingModalAction = null;
+
+  function shuffleIdx(n) {
+    const a = Array.from({length:n}, (_,i)=>i);
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function resetState() {
+    level = 1; turns = 0; score = 0;
+    pools = {
+      truth: {1:shuffleIdx(DECK.truth[1].length), 2:shuffleIdx(DECK.truth[2].length), 3:shuffleIdx(DECK.truth[3].length)},
+      temptation: {1:shuffleIdx(DECK.temptation[1].length), 2:shuffleIdx(DECK.temptation[2].length), 3:shuffleIdx(DECK.temptation[3].length)}
+    };
+    usedFlat = {};
+  }
+
+  function saveState() {
+    const data = { level, turns, score, scoringOn, pools, usedFlat };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch(e) { return null; }
+  }
+
+  function clearState() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  }
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function toggleInfo() { document.getElementById('infoBox').classList.toggle('open'); }
+
+  function init() {
+    const saved = loadState();
+    if (saved && saved.turns > 0) {
+      level = saved.level; turns = saved.turns; score = saved.score;
+      scoringOn = saved.scoringOn; pools = saved.pools; usedFlat = saved.usedFlat || {};
+      document.getElementById('resumeDesc').textContent =
+        `Level ${level} · ${LEVEL_NAMES[level]} — ${turns} turn${turns===1?'':'s'} played${scoringOn ? `, score ${score}` : ''}.`;
+      show('resumeScreen');
+    } else {
+      show('cover');
+    }
+  }
+
+  function resume() {
+    renderChoiceScreen();
+    show('choice');
+  }
+
+  function startFresh(withScoring) {
+    scoringOn = !!withScoring;
+    resetState();
+    saveState();
+    renderChoiceScreen();
+    show('choice');
+  }
+
+  function renderChoiceScreen() {
+    document.getElementById('heatLabel').textContent = `Level ${level} · ${LEVEL_NAMES[level]}`;
+    for (let i = 1; i <= 3; i++) document.getElementById('f'+i).classList.toggle('on', i <= level);
+
+    const cap = LEVEL_UP_AT[level] || (LEVEL_UP_AT[2] + 12);
+    const prevCap = level === 1 ? 0 : LEVEL_UP_AT[level-1];
+    const span = cap - prevCap;
+    const into = Math.max(0, turns - prevCap);
+    const pct = level === 3 ? 100 : Math.min(100, (into / span) * 100);
+    document.getElementById('levelProgressFill').style.width = pct + '%';
+
+    const scoreRow = document.getElementById('scoreRowChoice');
+    if (scoringOn) {
+      scoreRow.style.display = 'flex';
+      scoreRow.innerHTML = `<div class="scoreChip">Shared score: <b>${score}</b></div>`;
+    } else {
+      scoreRow.style.display = 'none';
+      scoreRow.innerHTML = '';
+    }
+  }
+
+  function drawFrom(category) {
+    const bank = DECK[category][level];
+    let pool = pools[category][level];
+    // filter out anything already used this session, if possible
+    let candidates = pool.filter(i => !usedFlat[category+':'+level+':'+i]);
+    if (candidates.length === 0) {
+      // Level bank exhausted for this category this session — reshuffle as a last resort.
+      // (Documented limitation: see QA_REPORT.md — equivalent to running out of physical cards.)
+      pools[category][level] = shuffleIdx(bank.length);
+      candidates = pools[category][level];
+    }
+    const idx = candidates[0];
+    // remove drawn idx from the stored pool so it isn't drawn again this pass
+    pools[category][level] = pool.filter(i => i !== idx);
+    if (pools[category][level].length === 0) pools[category][level] = shuffleIdx(bank.length).filter(i=>i!==idx);
+    usedFlat[category+':'+level+':'+idx] = true;
+    return { idx, text: bank[idx] };
+  }
+
+  function choose(category) {
+    currentCategory = category;
+    const drawn = drawFrom(category);
+    currentIdx = drawn.idx;
+    document.getElementById('rCatLabel').textContent = category.toUpperCase();
+    document.getElementById('rCatLabel').className = 'catLabel ' + category;
+    document.getElementById('rText').textContent = drawn.text;
+    show('reveal');
+  }
+
+  function skip() { choose(currentCategory); }
+
+  function done() {
+    if (scoringOn) score += (currentCategory === 'temptation') ? 2 : 1;
+    turns++;
+    if (turns === LEVEL_UP_AT[1] && level === 1) level = 2;
+    else if (turns === LEVEL_UP_AT[2] && level === 2) level = 3;
+    saveState();
+    renderChoiceScreen();
+    show('choice');
+  }
+
+  function finishGame() {
+    document.getElementById('scoreBlock').style.display = scoringOn ? 'block' : 'none';
+    document.getElementById('finalScoreNum').textContent = score;
+    document.getElementById('endDesc').textContent = scoringOn
+      ? "However far you took it, you took it together — and the score proves you didn't play it safe."
+      : "However far you took it, you took it together.";
+    clearState();
+    show('end');
+  }
+
+  function confirmEndGame() {
+    pendingModalAction = finishGame;
+    document.getElementById('modalTitle').textContent = 'End the game here?';
+    document.getElementById('modalBody').textContent = "You'll see your result screen now instead of continuing.";
+    document.getElementById('modalConfirmBtn').textContent = 'End Game';
+    openModal();
+  }
+
+  function confirmStartOver(fromEndScreen) {
+    pendingModalAction = () => { clearState(); show('cover'); };
+    document.getElementById('modalTitle').textContent = 'Start over?';
+    document.getElementById('modalBody').textContent = fromEndScreen
+      ? "Ready to play again from the beginning?"
+      : "This clears your current progress and score.";
+    document.getElementById('modalConfirmBtn').textContent = fromEndScreen ? 'Play Again' : 'Start Over';
+    openModal();
+  }
+
+  function openModal() { document.getElementById('modalOverlay').classList.add('open'); }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); pendingModalAction = null; }
+
+  document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+    if (pendingModalAction) pendingModalAction();
+    closeModal();
+  });
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+  });
+
+  return { init, toggleInfo, startFresh, resume, choose, skip, done, confirmEndGame, confirmStartOver, closeModal };
+})();
+
+document.addEventListener('DOMContentLoaded', App.init);
+</script>
+</body>
+</html>

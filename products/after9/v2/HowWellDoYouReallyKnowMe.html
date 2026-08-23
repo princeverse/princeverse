@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>How Well Do You Really Know Me? — After.9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #120e10; --bg-2: #1c1417; --bg-3: #241a1e;
+    --wine: #8a2332; --wine-light: #b23a4a; --gold: #c9a15a;
+    --cream: #f4ead9; --cream-dim: #baac97; --line: rgba(244,234,217,0.14);
+    --focus: #e7c78a; --good: #7c9e6e;
+    --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-l: env(safe-area-inset-left, 0px); --safe-r: env(safe-area-inset-right, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin:0; padding:0; height:100%; background:var(--bg); color:var(--cream);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; overscroll-behavior:none;
+    overflow-x:hidden; max-width:100vw; }
+  body { display:flex; align-items:center; justify-content:center; min-height:100vh; min-height:100dvh;
+    background-image: radial-gradient(ellipse 800px 500px at 20% -10%, rgba(138,35,50,0.32), transparent),
+                       radial-gradient(ellipse 700px 500px at 100% 110%, rgba(201,161,90,0.10), transparent); }
+  .app { width:100%; max-width:480px; height:100vh; height:100dvh; display:flex; flex-direction:column;
+    position:relative; overflow:hidden; padding-top:var(--safe-t); padding-bottom:var(--safe-b); }
+  .screen { flex:1; min-height:0; display:none; flex-direction:column;
+    padding: clamp(18px,4vw,32px) max(20px, calc(var(--safe-l) + 16px)) 0 max(20px, calc(var(--safe-r) + 16px));
+    overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .screen.active { display:flex; }
+
+  .kicker { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); font-weight:600; text-align:center; margin-bottom:6px; }
+  .fade-in { animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce) { .fade-in { animation: none; } * { transition-duration: 0.001ms !important; } }
+
+  #cover { justify-content:center; text-align:center; }
+  #cover .title { font-family:'Fraunces',serif; font-weight:600; font-size:clamp(28px,8vw,38px); line-height:1.15; color:var(--cream); margin:0 0 12px 0; overflow-wrap:break-word; }
+  #cover .tagline { font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:clamp(14px,3.6vw,17px); color:var(--gold); margin:0 0 22px 0; }
+  #cover .desc { font-size:clamp(13px,3.6vw,14.5px); line-height:1.6; color:var(--cream-dim); margin:0 0 30px 0; max-width:360px; margin-left:auto; margin-right:auto; }
+
+  .btn { border:none; border-radius:100px; padding:16px 24px; font-family:'Inter',sans-serif; font-weight:600;
+    font-size:clamp(13px,3.6vw,14.5px); letter-spacing:0.3px; cursor:pointer; width:100%; }
+  .btn:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+  .btn-primary { background:linear-gradient(135deg,var(--wine-light),var(--wine)); color:var(--cream); box-shadow:0 8px 24px rgba(138,35,50,0.35); }
+  .btn-ghost { background:transparent; color:var(--cream-dim); border:1px solid var(--line); }
+  .btn-gold { background:linear-gradient(135deg,#dcb96f,var(--gold)); color:#1c1417; box-shadow:0 8px 24px rgba(201,161,90,0.3); }
+  .linkBtn { background:none; border:none; color:var(--gold); font-size:13px; text-decoration:underline; cursor:pointer; padding:8px 4px; }
+  .linkBtn:focus-visible { outline:3px solid var(--focus); outline-offset:2px; border-radius:4px; }
+  #toggles { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; justify-content:center; }
+
+  #infoBox { display:none; text-align:left; background:var(--bg-2); border:1px solid var(--line); border-radius:14px; padding:18px; margin-top:16px; font-size:13px; line-height:1.7; color:var(--cream-dim); }
+  #infoBox.open { display:block; }
+  #infoBox h3 { font-family:'Fraunces',serif; font-size:15px; color:var(--cream); margin:0 0 8px 0; }
+  #infoBox ul { margin:0; padding-left:18px; }
+  #infoBox li { margin-bottom:6px; }
+  .consentLine { font-size:12.5px; color:var(--gold); text-align:center; margin-top:14px; line-height:1.6; }
+
+  .centerCol { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .roundNum { width:52px; height:52px; border-radius:50%; border:1px solid var(--gold); color:var(--gold);
+    display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-size:19px; margin:0 auto 18px auto; }
+  .roundName { font-family:'Fraunces',serif; font-weight:600; font-size:clamp(24px,7vw,29px); color:var(--cream); margin:0 0 14px 0; }
+  .roundDesc { font-size:clamp(13px,3.6vw,14.5px); line-height:1.6; color:var(--cream-dim); max-width:340px; margin:0 auto 30px auto; }
+
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; gap: 8px;}
+  .roundLabel { font-size:10.5px; letter-spacing:1.6px; text-transform:uppercase; color:var(--gold); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progressText { font-size:12px; color:var(--cream-dim); white-space:nowrap; }
+  .progressTrack { height:3px; background:var(--line); border-radius:3px; overflow:hidden; margin-bottom:clamp(18px,5vw,28px); }
+  .progressFill { height:100%; background:linear-gradient(90deg,var(--wine),var(--gold)); border-radius:3px; transition:width 0.35s ease; }
+
+  .turnBanner { text-align:center; background:var(--bg-2); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:20px; }
+  .turnBanner .who { font-family:'Fraunces',serif; font-size:clamp(16px,4.5vw,19px); color:var(--cream); }
+  .turnBanner .what { font-size:12.5px; color:var(--cream-dim); margin-top:4px; }
+
+  .qCard { background:var(--bg-2); border:1px solid var(--line); border-radius:22px; padding:clamp(22px,6vw,32px) clamp(18px,5vw,24px); margin-bottom:20px; }
+  .qCard .qText { font-family:'Fraunces',serif; font-weight:500; font-size:clamp(18px,5vw,22px); line-height:1.4; color:var(--cream); text-align:center; overflow-wrap:break-word; }
+
+  .optionGrid { display:flex; flex-direction:column; gap:10px; }
+  .optionBtn { background:var(--bg-3); border:1px solid var(--line); border-radius:14px; padding:15px 16px; color:var(--cream);
+    font-family:'Inter',sans-serif; font-size:clamp(13.5px,3.8vw,15px); text-align:left; cursor:pointer; }
+  .optionBtn:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+  .optionBtn.selected { border-color:var(--gold); background:linear-gradient(135deg, var(--bg-3), rgba(201,161,90,0.16)); }
+  .optionRow2 { display:flex; gap:10px; }
+  .optionRow2 .optionBtn { flex:1; text-align:center; }
+
+  .ratingGrid { display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; }
+  .ratingBtn { aspect-ratio:1; border-radius:12px; background:var(--bg-3); border:1px solid var(--line); color:var(--cream);
+    font-family:'Fraunces',serif; font-size:clamp(14px,4vw,16px); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .ratingBtn:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+  .ratingBtn.selected { border-color:var(--gold); background:linear-gradient(135deg, var(--bg-3), rgba(201,161,90,0.2)); color:var(--gold); }
+  .ratingLabels { display:flex; justify-content:space-between; font-size:10.5px; color:var(--cream-dim); margin-top:6px; margin-bottom:16px; }
+
+  .lockIcon { font-size:40px; margin-bottom:14px; color:var(--gold); }
+
+  .revealCompare { display:flex; gap:10px; margin-bottom: 18px; }
+  .revealCol { flex:1; background:var(--bg-3); border:1px solid var(--line); border-radius:14px; padding:14px 12px; text-align:center; }
+  .revealCol .label { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:6px; }
+  .revealCol .val { font-family:'Fraunces',serif; font-size:clamp(14px,4vw,17px); color:var(--cream); overflow-wrap:break-word; }
+  .resultBadge { text-align:center; border-radius:14px; padding:14px; margin-bottom:20px; font-family:'Fraunces',serif; font-size:clamp(17px,4.6vw,20px); }
+  .resultBadge.nailed { background: rgba(124,158,110,0.18); color:#a9c79c; border:1px solid rgba(124,158,110,0.4); }
+  .resultBadge.close { background: rgba(201,161,90,0.16); color:var(--gold); border:1px solid rgba(201,161,90,0.4); }
+  .resultBadge.miss { background: rgba(138,35,50,0.16); color:#d78a97; border:1px solid rgba(138,35,50,0.4); }
+
+  .actions { display:flex; gap:10px; margin-top:auto; padding-top: 16px; flex-wrap:wrap; }
+  .actions .btn-ghost { flex:1 1 100px; min-width:90px; }
+  .actions .btn-primary { flex:2 1 160px; min-width:140px; }
+
+  .scoreChipRow { text-align:center; margin-bottom:8px; }
+  .scoreChip { display:inline-block; background:var(--bg-2); border:1px solid var(--line); border-radius:100px; padding:6px 14px; font-size:12px; color:var(--cream-dim); }
+  .scoreChip b { color:var(--gold); }
+
+  #finalResult .bigScore { font-family:'Fraunces',serif; font-size:clamp(44px,13vw,58px); color:var(--gold); margin-bottom:4px; }
+  #finalResult .bigScoreLabel { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:22px; }
+
+  .footNote { flex-shrink:0; text-align:center; font-size:10.5px; color:var(--cream-dim); opacity:0.75;
+    padding:10px max(20px, calc(var(--safe-l) + 16px)) calc(10px + var(--safe-b)) max(20px, calc(var(--safe-r) + 16px));
+    border-top:1px solid var(--line); }
+
+  .modalOverlay { position:fixed; inset:0; background:rgba(8,6,7,0.72); display:none; align-items:center; justify-content:center; z-index:20; padding:24px; }
+  .modalOverlay.open { display:flex; }
+  .modalBox { background:var(--bg-2); border:1px solid var(--line); border-radius:18px; padding:26px 22px; max-width:340px; width:100%; text-align:center; }
+  .modalBox h3 { font-family:'Fraunces',serif; font-size:19px; margin:0 0 10px 0; color:var(--cream); }
+  .modalBox p { font-size:13px; color:var(--cream-dim); line-height:1.6; margin:0 0 20px 0; }
+  .modalActions { display:flex; gap:10px; }
+  .modalActions .btn { padding:13px 16px; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- COVER -->
+  <div class="screen active" id="cover">
+    <div class="kicker">After.9</div>
+    <div class="title">How Well Do You<br>Really Know Me?</div>
+    <div class="tagline">A prediction game, not just a conversation.</div>
+    <div class="desc">One of you answers honestly and privately. The other predicts it. Then you reveal — and find out how well you really know each other, one round at a time.</div>
+    <button class="btn btn-primary" onclick="App.startFresh()">Start Playing</button>
+    <div id="toggles">
+      <button class="linkBtn" onclick="App.toggleInfo()">How to play</button>
+    </div>
+    <div id="infoBox">
+      <h3>How It Works</h3>
+      <ul>
+        <li>Each round, one partner privately locks in a real answer, then hands the phone over.</li>
+        <li>The other partner predicts what was chosen — then you reveal together.</li>
+        <li>You'll alternate who answers and who predicts each turn.</li>
+        <li>Nine questions per round, drawn from a larger pool — replay and you'll see new ones.</li>
+        <li>Skip any question, any time, no explanation needed.</li>
+        <li>Four rounds, each a little more revealing than the last — ending at After.9.</li>
+      </ul>
+      <div class="consentLine">This is collaborative, not competitive — the score is something you build together.</div>
+    </div>
+  </div>
+
+  <!-- RESUME -->
+  <div class="screen" id="resumeScreen">
+    <div class="centerCol">
+      <div class="kicker">After.9</div>
+      <div class="title" style="font-size:clamp(24px,6.5vw,30px);">Welcome back</div>
+      <div class="desc" id="resumeDesc">You have a game in progress.</div>
+      <button class="btn btn-primary" onclick="App.resume()">Resume Game</button>
+      <button class="btn btn-ghost" style="margin-top:12px;" onclick="App.confirmStartOver()">Start Over</button>
+    </div>
+  </div>
+
+  <!-- ROUND INTRO -->
+  <div class="screen" id="roundIntro">
+    <div class="centerCol">
+      <div class="roundNum" id="riNum">1</div>
+      <div class="roundName" id="riName"></div>
+      <div class="roundDesc" id="riDesc"></div>
+      <button class="btn btn-primary" onclick="App.beginRound()">Begin Round</button>
+    </div>
+  </div>
+
+  <!-- CONSENT CHECKPOINT (before round 4) -->
+  <div class="screen" id="consentCheckpoint">
+    <div class="centerCol">
+      <div class="kicker">Before You Continue</div>
+      <div class="roundName" style="font-size:clamp(20px,6vw,25px);">Everything ahead is optional.</div>
+      <div class="roundDesc">Skip anything, any time — no explanation needed. Go at whatever pace feels good to both of you. This round is about mutual anticipation, not pressure.</div>
+      <button class="btn btn-primary" onclick="App.dismissConsentCheckpoint()">Continue to After.9</button>
+    </div>
+  </div>
+
+  <!-- HANDOFF: ANSWER -->
+  <div class="screen" id="handoffAnswer">
+    <div class="centerCol">
+      <div class="lockIcon">&#9679;</div>
+      <div class="turnBanner" style="width:100%;">
+        <div class="who" id="haWho">Partner A's turn to answer</div>
+        <div class="what">You'll answer privately — your partner won't see it yet.</div>
+      </div>
+      <button class="btn btn-primary" onclick="App.startAnswering()">I'm Ready</button>
+    </div>
+  </div>
+
+  <!-- ANSWERING (private) -->
+  <div class="screen" id="answering">
+    <div class="topbar"><span class="roundLabel" id="ansRoundLabel">Round 1</span><span class="progressText" id="ansProgressText">1 / 9</span></div>
+    <div class="progressTrack"><div class="progressFill" id="ansProgressFill" style="width:0%"></div></div>
+    <div class="turnBanner"><div class="who" id="ansWho">Your turn — answer honestly</div></div>
+    <div class="qCard fade-in" id="ansCardWrap">
+      <div class="qText" id="ansQText">Loading…</div>
+    </div>
+    <div id="ansInputArea"></div>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="App.skipQuestion()">Skip</button>
+      <button class="btn btn-primary" id="ansLockBtn" onclick="App.lockAnswer()" disabled>Lock In My Answer</button>
+    </div>
+  </div>
+
+  <!-- HANDOFF: PREDICT -->
+  <div class="screen" id="handoffPredict">
+    <div class="centerCol">
+      <div class="lockIcon">&#128274;</div>
+      <div class="turnBanner" style="width:100%;">
+        <div class="who">Answer locked in.</div>
+        <div class="what" id="hpWhat">Pass the phone to your partner — no peeking.</div>
+      </div>
+      <button class="btn btn-primary" onclick="App.startPredicting()">I'm Ready to Guess</button>
+    </div>
+  </div>
+
+  <!-- PREDICTING -->
+  <div class="screen" id="predicting">
+    <div class="topbar"><span class="roundLabel" id="predRoundLabel">Round 1</span><span class="progressText" id="predProgressText">1 / 9</span></div>
+    <div class="progressTrack"><div class="progressFill" id="predProgressFill" style="width:0%"></div></div>
+    <div class="turnBanner"><div class="who" id="predWho">Your turn — what did they pick?</div></div>
+    <div class="qCard fade-in" id="predCardWrap">
+      <div class="qText" id="predQText">Loading…</div>
+    </div>
+    <div id="predInputArea"></div>
+    <div class="actions">
+      <button class="btn btn-primary" id="predLockBtn" onclick="App.lockPrediction()" disabled style="flex: 1 1 100%;">Lock In My Guess</button>
+    </div>
+  </div>
+
+  <!-- REVEAL -->
+  <div class="screen" id="reveal">
+    <div class="centerCol" style="justify-content:flex-start; padding-top: 10px;">
+      <div class="kicker">Reveal</div>
+      <div class="revealCompare fade-in" style="width:100%; margin-top: 16px;">
+        <div class="revealCol"><div class="label" id="revLabelA">Answer</div><div class="val" id="revValA">—</div></div>
+        <div class="revealCol"><div class="label" id="revLabelB">Guess</div><div class="val" id="revValB">—</div></div>
+      </div>
+      <div class="resultBadge fade-in" id="resultBadge">Nailed it!</div>
+      <div class="scoreChipRow"><div class="scoreChip">Compatibility so far: <b id="revScore">0</b> / <span id="revMax">0</span></div></div>
+    </div>
+    <div class="actions"><button class="btn btn-primary" onclick="App.nextQuestion()">Next</button></div>
+  </div>
+
+  <!-- ROUND END -->
+  <div class="screen" id="roundEnd">
+    <div class="centerCol">
+      <div class="roundNum">&#10003;</div>
+      <div class="roundName" id="reTitle">Round 1 complete</div>
+      <div class="roundDesc" id="reDesc"></div>
+      <button class="btn btn-primary" id="reBtn" onclick="App.afterRoundEnd()">Continue</button>
+    </div>
+  </div>
+
+  <!-- FINAL RESULT -->
+  <div class="screen" id="finalResult">
+    <div class="centerCol">
+      <div class="kicker">Game Complete</div>
+      <div class="bigScore" id="finalPct">0%</div>
+      <div class="bigScoreLabel">Compatibility Score</div>
+      <div class="roundDesc" id="finalMsg"></div>
+      <button class="btn btn-gold" onclick="App.confirmStartOver(true)">Play Again</button>
+      <div style="border-top:1px solid var(--line); margin-top:22px; padding-top:20px; width:100%;">
+        <p style="font-size:12.5px; color:var(--cream-dim); text-align:center;">Ready for more? Truth or Temptation raises the stakes even further — and the After.9 Collection brings both together.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">After.9 &middot; Play tasteful, play consensual, play together.</div>
+</div>
+
+<div class="modalOverlay" id="modalOverlay">
+  <div class="modalBox">
+    <h3 id="modalTitle">Start over?</h3>
+    <p id="modalBody">This clears your current progress and score.</p>
+    <div class="modalActions">
+      <button class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modalConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Question bank. Each question: {id, format, prompt, options?}
+   format: "tot" (this-or-that, options=[a,b]) | "mc4" (options=[4])
+           | "rating" (1-10 scale, no options)
+   ============================================================ */
+const ROUNDS = [
+  { key:1, name:"You Should Know This", intro:"Warm-up round. Easy wins — preferences, habits, everyday knowledge.",
+    questions: [
+      {id:"r1q1", format:"tot", prompt:"Morning person or night owl?", options:["Morning person","Night owl"]},
+      {id:"r1q2", format:"tot", prompt:"Sweet snacks or salty snacks?", options:["Sweet","Salty"]},
+      {id:"r1q3", format:"tot", prompt:"Text first, or wait to be texted?", options:["Text first","Wait to be texted"]},
+      {id:"r1q4", format:"tot", prompt:"Window seat or aisle seat?", options:["Window","Aisle"]},
+      {id:"r1q5", format:"tot", prompt:"Plan every detail, or wing it?", options:["Plan ahead","Wing it"]},
+      {id:"r1q6", format:"tot", prompt:"Beach vacation or mountain vacation?", options:["Beach","Mountains"]},
+      {id:"r1q7", format:"tot", prompt:"Early to bed or up late?", options:["Early to bed","Up late"]},
+      {id:"r1q8", format:"tot", prompt:"Cook at home or order in?", options:["Cook at home","Order in"]},
+      {id:"r1q9", format:"mc4", prompt:"Which snack do I reach for most?", options:["Chips","Chocolate","Fruit","Cheese"]},
+      {id:"r1q10", format:"mc4", prompt:"What's my comfort-show genre?", options:["Comedy","Drama","True crime","Reality TV"]},
+      {id:"r1q11", format:"mc4", prompt:"How do I take my coffee or tea?", options:["Black / plain","Cream and sugar","Iced, always","I don't drink it"]},
+      {id:"r1q12", format:"mc4", prompt:"What's my ideal Saturday?", options:["Sleeping in","Outdoor adventure","Getting things done","Seeing friends"]},
+      {id:"r1q13", format:"mc4", prompt:"What's the first thing I do when I get home?", options:["Change clothes","Check my phone","Get a snack","Sit and decompress"]},
+      {id:"r1q14", format:"mc4", prompt:"What's my order when I can't decide?", options:["Whatever you're having","The house special","Something familiar","I ask the server"]},
+      {id:"r1q15", format:"rating", prompt:"1-10, how much of a morning person am I, really?"},
+      {id:"r1q16", format:"rating", prompt:"1-10, how organized am I with my own stuff?"},
+      {id:"r1q17", format:"rating", prompt:"1-10, how likely am I to sing along in the car?"},
+      {id:"r1q18", format:"rating", prompt:"1-10, how patient am I when things go wrong?"},
+      {id:"r1q19", format:"rating", prompt:"1-10, how adventurous am I with new food?"},
+      {id:"r1q20", format:"rating", prompt:"1-10, how much do I like surprises?"}
+    ]
+  },
+  { key:2, name:"Between Us", intro:"Getting warmer. Memories, affection, and how we communicate.",
+    questions: [
+      {id:"r2q1", format:"tot", prompt:"Do I feel most loved through touch, or through words?", options:["Touch","Words"]},
+      {id:"r2q2", format:"tot", prompt:"Surprise plans or advance notice?", options:["Surprise plans","Advance notice"]},
+      {id:"r2q3", format:"tot", prompt:"Talk it out right away, or need space first?", options:["Talk right away","Need space first"]},
+      {id:"r2q4", format:"tot", prompt:"A handwritten note, or a thoughtful gift?", options:["Handwritten note","Thoughtful gift"]},
+      {id:"r2q5", format:"tot", prompt:"A quiet night in together, or a night out together?", options:["Night in","Night out"]},
+      {id:"r2q6", format:"tot", prompt:"Do I show love more through actions, or through saying it?", options:["Actions","Saying it"]},
+      {id:"r2q7", format:"tot", prompt:"Do I remember milestones by the date, or by the feeling?", options:["The exact date","The feeling of it"]},
+      {id:"r2q8", format:"tot", prompt:"Big decisions — always talked through together, or split by strength?", options:["Always together","Split by strength"]},
+      {id:"r2q9", format:"mc4", prompt:"What's my love language, really?", options:["Physical touch","Words of affirmation","Quality time","Acts of service"]},
+      {id:"r2q10", format:"mc4", prompt:"What's my favorite kind of memory to make?", options:["Photos","Inside jokes","Traditions we repeat","Spontaneous moments"]},
+      {id:"r2q11", format:"mc4", prompt:"What do I need most after a hard day?", options:["To vent it out","Quiet company","Distraction and fun","Space, then talk"]},
+      {id:"r2q12", format:"mc4", prompt:"What's the most 'us' thing we do?", options:["A shared routine","An inside joke","A recurring date idea","How we make up after disagreements"]},
+      {id:"r2q13", format:"mc4", prompt:"What made me fall for you, more than anything?", options:["How you made me feel","Something you said early on","How you treated other people","One specific moment I still think about"]},
+      {id:"r2q14", format:"mc4", prompt:"What do I value most in how we communicate?", options:["Honesty, even when it's hard","Humor, even in serious moments","Patience","Directness"]},
+      {id:"r2q15", format:"rating", prompt:"1-10, how much do I value alone time inside a relationship?"},
+      {id:"r2q16", format:"rating", prompt:"1-10, how sentimental am I about anniversaries and milestones?"},
+      {id:"r2q17", format:"rating", prompt:"1-10, how much do small everyday gestures matter to me?"},
+      {id:"r2q18", format:"rating", prompt:"1-10, how much has this relationship changed how I see myself?"},
+      {id:"r2q19", format:"rating", prompt:"1-10, how comfortable am I being the one to apologize first?"},
+      {id:"r2q20", format:"rating", prompt:"1-10, how much do I think about our future together?"}
+    ]
+  },
+  { key:3, name:"Read My Mind", intro:"No overthinking — attraction, chemistry, and a few things left unsaid.",
+    questions: [
+      {id:"r3q1", format:"tot", prompt:"What caught my attention first — your smile or your voice?", options:["Your smile","Your voice"]},
+      {id:"r3q2", format:"tot", prompt:"Do I love compliments about how you look, or how you make me feel, more?", options:["How you look","How you make me feel"]},
+      {id:"r3q3", format:"tot", prompt:"Am I more drawn to confidence, or to kindness?", options:["Confidence","Kindness"]},
+      {id:"r3q4", format:"tot", prompt:"Do I prefer you dressed up, or completely relaxed?", options:["Dressed up","Completely relaxed"]},
+      {id:"r3q5", format:"tot", prompt:"Eye contact or a good laugh — which gets me every time?", options:["Eye contact","A good laugh"]},
+      {id:"r3q6", format:"tot", prompt:"Slow build-up, or a spontaneous spark?", options:["Slow build-up","Spontaneous spark"]},
+      {id:"r3q7", format:"tot", prompt:"Do I notice your energy in a room before anything else?", options:["Yes, energy first","No, something else first"]},
+      {id:"r3q8", format:"tot", prompt:"A compliment or a look — which says more to me?", options:["A compliment","A look"]},
+      {id:"r3q9", format:"mc4", prompt:"What's the first thing I noticed about you?", options:["Your smile","Your energy","How you talked to others","Your style"]},
+      {id:"r3q10", format:"mc4", prompt:"When do I find you most attractive?", options:["Right when you wake up","Dressed up for a night out","Mid-laugh, off guard","Deep in a real conversation"]},
+      {id:"r3q11", format:"mc4", prompt:"When do I remember our chemistry feeling undeniable?", options:["Our first real conversation","A specific date","A quiet ordinary moment","Somewhere unexpected"]},
+      {id:"r3q12", format:"mc4", prompt:"What pulls me in most, day to day?", options:["The way you listen","Your sense of humor","How you carry yourself","How you make me feel around you"]},
+      {id:"r3q13", format:"mc4", prompt:"What do I think about more than I let on?", options:["Our first kiss","A specific memory of us","Something you said recently","How you look at me sometimes"]},
+      {id:"r3q14", format:"mc4", prompt:"What's something about you I find myself noticing?", options:["Your eyes","Your hands","Your smile","The way you move"]},
+      {id:"r3q15", format:"rating", prompt:"1-10, how often do I think about you during a normal day?"},
+      {id:"r3q16", format:"rating", prompt:"1-10, how obvious is it when I'm attracted to you in the moment?"},
+      {id:"r3q17", format:"rating", prompt:"1-10, how much does confidence factor into what I find attractive?"},
+      {id:"r3q18", format:"rating", prompt:"1-10, how much do I still get a little nervous around you sometimes?"},
+      {id:"r3q19", format:"rating", prompt:"1-10, how much do I think about the way we met?"},
+      {id:"r3q20", format:"rating", prompt:"1-10, how much does the way you make me laugh affect how attracted I feel?"}
+    ]
+  },
+  { key:4, name:"After.9", intro:"The last round. Anticipation, closeness, and mutual desire — at whatever pace feels right.",
+    questions: [
+      {id:"r4q1", format:"tot", prompt:"Lights on, or lights off?", options:["Lights on","Lights off"]},
+      {id:"r4q2", format:"tot", prompt:"Slow and lingering, or playful and spontaneous?", options:["Slow and lingering","Playful and spontaneous"]},
+      {id:"r4q3", format:"tot", prompt:"Do I want to be kissed first, or to kiss first?", options:["Be kissed first","Kiss first"]},
+      {id:"r4q4", format:"tot", prompt:"Anticipation that builds slowly, or momentum that builds fast?", options:["Slow anticipation","Fast momentum"]},
+      {id:"r4q5", format:"tot", prompt:"Music playing, or complete quiet?", options:["Music playing","Complete quiet"]},
+      {id:"r4q6", format:"tot", prompt:"Do I want more words tonight, or more touch?", options:["More words","More touch"]},
+      {id:"r4q7", format:"tot", prompt:"Do I like setting the pace myself, or having you set it?", options:["I set the pace","You set the pace"]},
+      {id:"r4q8", format:"tot", prompt:"A familiar favorite tonight, or something new?", options:["A familiar favorite","Something new"]},
+      {id:"r4q9", format:"mc4", prompt:"What sets the mood for me most?", options:["Music","Real conversation","Physical closeness","Anticipation built over the day"]},
+      {id:"r4q10", format:"mc4", prompt:"Which compliment gets to me most tonight?", options:["About how I look","About my voice","About how you feel around me","About my confidence"]},
+      {id:"r4q11", format:"mc4", prompt:"What do I want more of, right now?", options:["Your attention","Your hands","Your words","Your laugh"]},
+      {id:"r4q12", format:"mc4", prompt:"What's the version of tonight I'm hoping for?", options:["Slow and intentional","Playful and a little wild","Deeply talked-through","Whatever happens, happens"]},
+      {id:"r4q13", format:"mc4", prompt:"What am I most curious about tonight?", options:["What you're thinking","What you want","How far this goes","Just being close to you"]},
+      {id:"r4q14", format:"mc4", prompt:"Where do I want your attention most tonight?", options:["My eyes","My words","My hands","Just me, generally"]},
+      {id:"r4q15", format:"rating", prompt:"1-10, how much do I think about our first kiss, even now?"},
+      {id:"r4q16", format:"rating", prompt:"1-10, how important is anticipation to how much I enjoy tonight?"},
+      {id:"r4q17", format:"rating", prompt:"1-10, how bold would I be if you took the lead tonight?"},
+      {id:"r4q18", format:"rating", prompt:"1-10, how different does tonight already feel from a normal night?"},
+      {id:"r4q19", format:"rating", prompt:"1-10, how much do I want this game to lead somewhere else?"},
+      {id:"r4q20", format:"rating", prompt:"1-10, right now, how much do you have my full attention?"}
+    ]
+  }
+];
+const QUESTIONS_PER_ROUND = 9;
+const STORAGE_KEY = "after9_how_well_v2";
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function findQuestion(roundKey, id) {
+  const r = ROUNDS.find(r => r.key === roundKey);
+  return r.questions.find(q => q.id === id);
+}
+
+const App = (() => {
+  let roundIdx = 0, posInRound = 0, turn = 'A', score = 0, maxScore = 0;
+  let roundQuestionIds = {};
+  let pendingAnswer = null; // { value } cleared after reveal
+  let pendingPrediction = null;
+  let phase = 'cover';
+  let pendingModalAction = null;
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function toggleInfo() { document.getElementById('infoBox').classList.toggle('open'); }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        roundIdx, posInRound, turn, score, maxScore, roundQuestionIds, pendingAnswer, pendingPrediction, phase
+      }));
+    } catch(e) {}
+  }
+  function loadState() {
+    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+  }
+  function clearState() { try { localStorage.removeItem(STORAGE_KEY); } catch(e) {} }
+
+  function init() {
+    const saved = loadState();
+    if (saved && saved.phase && saved.phase !== 'cover' && saved.phase !== 'finalResult') {
+      roundIdx = saved.roundIdx; posInRound = saved.posInRound; turn = saved.turn;
+      score = saved.score; maxScore = saved.maxScore; roundQuestionIds = saved.roundQuestionIds;
+      pendingAnswer = saved.pendingAnswer; pendingPrediction = saved.pendingPrediction; phase = saved.phase;
+      const r = ROUNDS[roundIdx];
+      document.getElementById('resumeDesc').textContent =
+        `${r.name} — question ${posInRound+1} of ${QUESTIONS_PER_ROUND}, compatibility ${score}/${maxScore || 1}.`;
+      show('resumeScreen');
+    } else {
+      show('cover');
+    }
+  }
+
+  function resume() { renderPhase(); }
+
+  function startFresh() {
+    roundIdx = 0; posInRound = 0; turn = 'A'; score = 0; maxScore = 0;
+    roundQuestionIds = {};
+    ROUNDS.forEach(r => { roundQuestionIds[r.key] = shuffle(r.questions.map(q=>q.id)).slice(0, QUESTIONS_PER_ROUND); });
+    pendingAnswer = null; pendingPrediction = null;
+    phase = 'roundIntro';
+    saveState();
+    renderRoundIntro();
+  }
+
+  function currentRound() { return ROUNDS[roundIdx]; }
+  function currentQuestion() {
+    const r = currentRound();
+    const id = roundQuestionIds[r.key][posInRound];
+    return findQuestion(r.key, id);
+  }
+
+  function renderRoundIntro() {
+    const r = currentRound();
+    document.getElementById('riNum').textContent = r.key;
+    document.getElementById('riName').textContent = r.name;
+    document.getElementById('riDesc').textContent = r.intro;
+    show('roundIntro');
+  }
+
+  function beginRound() {
+    posInRound = 0;
+    phase = 'handoffAnswer';
+    saveState();
+    renderHandoffAnswer();
+  }
+
+  function whoLabel(t) { return t === 'A' ? "Partner A" : "Partner B"; }
+  function otherOf(t) { return t === 'A' ? 'B' : 'A'; }
+
+  function renderHandoffAnswer() {
+    document.getElementById('haWho').textContent = `${whoLabel(turn)}'s turn to answer`;
+    show('handoffAnswer');
+  }
+
+  function startAnswering() {
+    phase = 'answering';
+    const r = currentRound();
+    const q = currentQuestion();
+    document.getElementById('ansRoundLabel').textContent = `Round ${r.key} · ${r.name}`;
+    document.getElementById('ansProgressText').textContent = `${posInRound+1} / ${QUESTIONS_PER_ROUND}`;
+    document.getElementById('ansProgressFill').style.width = `${((posInRound+1)/QUESTIONS_PER_ROUND)*100}%`;
+    document.getElementById('ansWho').textContent = `${whoLabel(turn)} — answer honestly`;
+    document.getElementById('ansQText').textContent = q.prompt;
+    document.getElementById('ansLockBtn').disabled = true;
+    renderInput('ansInputArea', q, (val) => {
+      pendingAnswer = { value: val };
+      document.getElementById('ansLockBtn').disabled = false;
+    });
+    show('answering');
+  }
+
+  function renderInput(containerId, q, onSelect) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    if (q.format === 'tot') {
+      const row = document.createElement('div'); row.className = 'optionRow2';
+      q.options.forEach((opt) => {
+        const b = document.createElement('button'); b.className = 'optionBtn'; b.type='button';
+        b.textContent = opt; b.setAttribute('aria-label', opt);
+        b.onclick = () => { row.querySelectorAll('.optionBtn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); onSelect(opt); };
+        row.appendChild(b);
+      });
+      el.appendChild(row);
+    } else if (q.format === 'mc4') {
+      const grid = document.createElement('div'); grid.className = 'optionGrid';
+      q.options.forEach((opt) => {
+        const b = document.createElement('button'); b.className = 'optionBtn'; b.type='button';
+        b.textContent = opt; b.setAttribute('aria-label', opt);
+        b.onclick = () => { grid.querySelectorAll('.optionBtn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); onSelect(opt); };
+        grid.appendChild(b);
+      });
+      el.appendChild(grid);
+    } else if (q.format === 'rating') {
+      const grid = document.createElement('div'); grid.className = 'ratingGrid';
+      for (let n = 1; n <= 10; n++) {
+        const b = document.createElement('button'); b.className = 'ratingBtn'; b.type='button';
+        b.textContent = n; b.setAttribute('aria-label', 'Rating ' + n);
+        b.onclick = () => { grid.querySelectorAll('.ratingBtn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); onSelect(n); };
+        grid.appendChild(b);
+      }
+      el.appendChild(grid);
+      const labels = document.createElement('div'); labels.className = 'ratingLabels';
+      labels.innerHTML = '<span>1</span><span>10</span>';
+      el.appendChild(labels);
+    }
+  }
+
+  function lockAnswer() {
+    if (!pendingAnswer) return;
+    phase = 'handoffPredict';
+    saveState();
+    document.getElementById('hpWhat').textContent = `Pass the phone to ${whoLabel(otherOf(turn))} — no peeking.`;
+    show('handoffPredict');
+  }
+
+  function startPredicting() {
+    phase = 'predicting';
+    const r = currentRound();
+    const q = currentQuestion();
+    document.getElementById('predRoundLabel').textContent = `Round ${r.key} · ${r.name}`;
+    document.getElementById('predProgressText').textContent = `${posInRound+1} / ${QUESTIONS_PER_ROUND}`;
+    document.getElementById('predProgressFill').style.width = `${((posInRound+1)/QUESTIONS_PER_ROUND)*100}%`;
+    document.getElementById('predWho').textContent = `${whoLabel(otherOf(turn))} — what did they pick?`;
+    document.getElementById('predQText').textContent = q.prompt;
+    document.getElementById('predLockBtn').disabled = true;
+    renderInput('predInputArea', q, (val) => {
+      pendingPrediction = { value: val };
+      document.getElementById('predLockBtn').disabled = false;
+    });
+    show('predicting');
+  }
+
+  function lockPrediction() {
+    if (!pendingPrediction) return;
+    phase = 'reveal';
+    computeReveal();
+  }
+
+  function computeReveal() {
+    const q = currentQuestion();
+    const real = pendingAnswer.value, guess = pendingPrediction.value;
+    let tier, points, maxPoints = 2;
+    if (q.format === 'rating') {
+      const diff = Math.abs(Number(real) - Number(guess));
+      if (diff <= 1) { tier = 'nailed'; points = 2; }
+      else if (diff <= 3) { tier = 'close'; points = 1; }
+      else { tier = 'miss'; points = 0; }
+    } else {
+      if (real === guess) { tier = 'nailed'; points = 2; }
+      else { tier = 'miss'; points = 0; }
+    }
+    score += points; maxScore += maxPoints;
+
+    document.getElementById('revLabelA').textContent = `${whoLabel(turn)} said`;
+    document.getElementById('revValA').textContent = q.format === 'rating' ? real : real;
+    document.getElementById('revLabelB').textContent = `${whoLabel(otherOf(turn))} guessed`;
+    document.getElementById('revValB').textContent = q.format === 'rating' ? guess : guess;
+
+    const badge = document.getElementById('resultBadge');
+    badge.className = 'resultBadge fade-in ' + tier;
+    badge.textContent = tier === 'nailed' ? 'Nailed it!' : tier === 'close' ? 'Close enough' : 'Not even close';
+
+    document.getElementById('revScore').textContent = score;
+    document.getElementById('revMax').textContent = maxScore;
+
+    // clear the transient private-answer data now that scoring is done —
+    // only the aggregate score is retained going forward.
+    pendingAnswer = null; pendingPrediction = null;
+    saveState();
+    show('reveal');
+  }
+
+  function nextQuestion() {
+    turn = otherOf(turn);
+    posInRound++;
+    if (posInRound >= QUESTIONS_PER_ROUND) {
+      phase = 'roundEnd';
+      saveState();
+      renderRoundEnd();
+    } else {
+      phase = 'handoffAnswer';
+      saveState();
+      renderHandoffAnswer();
+    }
+  }
+
+  function renderRoundEnd() {
+    const r = currentRound();
+    const isLast = roundIdx === ROUNDS.length - 1;
+    document.getElementById('reTitle').textContent = `${r.name} complete`;
+    if (isLast) {
+      renderFinalResult();
+      return;
+    }
+    const next = ROUNDS[roundIdx+1];
+    const teaser = {
+      2: "Round 2 gets a little more personal.",
+      3: "Round 3 stops being polite.",
+      4: "Round 4 is After.9 — the last one."
+    }[next.key] || "Ready for the next round?";
+    document.getElementById('reDesc').textContent = teaser;
+    document.getElementById('reBtn').textContent = `Continue to Round ${next.key}`;
+    show('roundEnd');
+  }
+
+  function afterRoundEnd() {
+    roundIdx++;
+    posInRound = 0;
+    if (roundIdx === 3) { // about to enter round 4 (index 3) = After.9
+      phase = 'consentCheckpoint';
+      saveState();
+      show('consentCheckpoint');
+    } else {
+      phase = 'roundIntro';
+      saveState();
+      renderRoundIntro();
+    }
+  }
+
+  function dismissConsentCheckpoint() {
+    phase = 'roundIntro';
+    saveState();
+    renderRoundIntro();
+  }
+
+  function renderFinalResult() {
+    const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+    document.getElementById('finalPct').textContent = pct + '%';
+    let msg;
+    if (pct >= 80) msg = "You know each other better than most couples ever will. That's not luck — that's paying attention.";
+    else if (pct >= 60) msg = "You read each other well, with plenty still left to discover. That's a good place to be.";
+    else msg = "Turns out there's more to learn about each other — in the best possible way.";
+    document.getElementById('finalMsg').textContent = msg;
+    clearState();
+    phase = 'finalResult';
+    show('finalResult');
+  }
+
+  function skipQuestion() {
+    // redraw: replace current question id with another unused one from the full bank if available
+    const r = currentRound();
+    const usedIds = new Set(roundQuestionIds[r.key]);
+    const alt = r.questions.map(q=>q.id).find(id => !usedIds.has(id));
+    if (alt) roundQuestionIds[r.key][posInRound] = alt;
+    saveState();
+    startAnswering();
+  }
+
+  function confirmStartOver(fromFinal) {
+    pendingModalAction = () => { clearState(); show('cover'); };
+    document.getElementById('modalTitle').textContent = 'Start over?';
+    document.getElementById('modalBody').textContent = fromFinal ? "Ready to play again from the beginning?" : "This clears your current progress and score.";
+    document.getElementById('modalConfirmBtn').textContent = fromFinal ? 'Play Again' : 'Start Over';
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); pendingModalAction = null; }
+  document.getElementById('modalConfirmBtn').addEventListener('click', () => { if (pendingModalAction) pendingModalAction(); closeModal(); });
+  document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target.id === 'modalOverlay') closeModal(); });
+
+  function renderPhase() {
+    switch(phase) {
+      case 'roundIntro': renderRoundIntro(); break;
+      case 'consentCheckpoint': show('consentCheckpoint'); break;
+      case 'handoffAnswer': renderHandoffAnswer(); break;
+      case 'answering': startAnswering(); break;
+      case 'handoffPredict': document.getElementById('hpWhat').textContent = `Pass the phone to ${whoLabel(otherOf(turn))} — no peeking.`; show('handoffPredict'); break;
+      case 'predicting': startPredicting(); break;
+      case 'roundEnd': renderRoundEnd(); break;
+      default: renderRoundIntro();
+    }
+  }
+
+  return {
+    init, toggleInfo, startFresh, resume, beginRound, startAnswering, lockAnswer,
+    startPredicting, lockPrediction, nextQuestion, afterRoundEnd, dismissConsentCheckpoint,
+    skipQuestion, confirmStartOver, closeModal
+  };
+})();
+
+document.addEventListener('DOMContentLoaded', App.init);
+</script>
+</body>
+</html>
