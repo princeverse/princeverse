@@ -1,12 +1,20 @@
 # QA Notes — The Kamasutra Guide (draft 1)
 
-Status: **Draft, not uploaded or published.** Static checks only — no headless
-browser was available in this environment for this pass (After.9's QA_REPORT.md
-used Playwright; that isn't installed here). Recommend a real-device or
-browser check before this goes live, the same way a Safari spot-check was
-flagged as outstanding for the After.9 products.
+Status: **Draft, not uploaded or published.** Updated after a real headless-browser
+pass (Playwright + the pre-installed Chromium) — see "Browser QA" below. Static
+checks from the first pass are unchanged and still hold.
 
-## What was checked
+## Browser QA (Chromium, headless, via Playwright)
+
+33 automated checks, all passing:
+
+- **No horizontal overflow** at all six required widths (320/360/375/390/414/430px), on the cover, browse, and detail screens — 18 checks, all pass.
+- **Full interaction flow**, scripted end to end: info box toggle, entering the browse screen, filtering by energy/flexibility/experience individually and in combination, a contradictory filter combo (Intense + High + Beginner, which has zero real matches) correctly shows the empty state instead of breaking, resetting filters restores all 36, search narrows correctly ("lotus" → exactly "The Lotus Circle," alt name "Yab-Yum" displayed correctly), favoriting from the detail screen, favorites-only filter, **favorite state survives a full page reload** (localStorage round-trip confirmed), Surprise Me opens a detail screen, and a live-DOM check confirms zero `div[onclick]` pseudo-buttons.
+- Full script and raw output available on request if you want to see it directly.
+
+**Not tested:** real Safari/WebKit (same limitation as the After.9 products — no WebKit engine available in this environment; the CSS uses the same broadly-supported patterns already used there, so risk is low but unconfirmed).
+
+## What was checked (static pass)
 
 - **JS syntax** — inline script extracted and validated with `node --check`. Passed. (One bug — a stray Python-style ternary left over from drafting — was caught and fixed before this check.)
 - **HTML structure** — parsed with Python's `html.parser`; no unclosed or mismatched tags.
@@ -20,13 +28,12 @@ flagged as outstanding for the After.9 products.
 
 ## Not yet done
 
-- No visual/overflow testing at the required screen widths (320–430px) — the CSS reuses the exact patterns already QA'd for that in Truth or Temptation (`clamp()` typography, `env(safe-area-inset-*)`, `overflow-x: hidden`, flexible card/button layout), so risk is low, but this hasn't been independently confirmed the way the After.9 files were.
-- No manual click-through of every filter combination, search, favorite-toggle, and Surprise Me path — only the data layer and DOM wiring were verified, not the full interaction flow end to end.
-- No Safari/WebKit check.
+- No Safari/WebKit check (see above).
+- No human read-through of the 36 entries for tone/accuracy — this is now the main open item.
 
 ## Recommendation
 
-Content and structure are ready for your read-through. Before publishing,
-I'd like to either get a real headless-browser pass (I can try installing
-Playwright if you want that now) or have you click through it once yourself
-on a phone — whichever you'd rather do.
+Structure, data integrity, and interaction are all verified. The one thing
+left before this is launch-ready is your read-through of the actual content
+and a sign-off on the $22 CAD price point — nothing further to test on my end
+until then.
