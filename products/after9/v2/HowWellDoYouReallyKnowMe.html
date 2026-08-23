@@ -394,8 +394,8 @@ const ROUNDS = [
   }
 ];
 const QUESTIONS_PER_ROUND = 9;
-const STORAGE_KEY = "after9_how_well_v3";
-const STORAGE_VERSION = 3;
+const STORAGE_KEY = "after9_how_well_v4";
+const STORAGE_VERSION = 4;
 const VALID_PHASES = ['roundIntro','consentCheckpoint','handoffAnswer','answering','handoffPredict','predicting','reveal','roundEnd'];
 
 function shuffle(arr) {
@@ -462,8 +462,9 @@ const App = (() => {
     for (const r of ROUNDS) {
       if (!isValidIdArray(saved.roundQuestionIds[r.key], r.key, { exactLength: QUESTIONS_PER_ROUND })) return null;
     }
-    // roundHistory is allowed to be missing (older-but-same-version edge case) —
-    // reseed it from roundQuestionIds rather than fail the whole restore.
+    // roundHistory is allowed to be missing (defensive edge case) — reseed it
+    // empty rather than fail the whole restore. Empty, not from
+    // roundQuestionIds: history means "actually shown," not "queued."
     if (saved.roundHistory && typeof saved.roundHistory === 'object') {
       for (const r of ROUNDS) {
         const h = saved.roundHistory[r.key];
@@ -471,7 +472,7 @@ const App = (() => {
       }
     } else {
       saved.roundHistory = {};
-      ROUNDS.forEach(r => { saved.roundHistory[r.key] = saved.roundQuestionIds[r.key].slice(); });
+      ROUNDS.forEach(r => { saved.roundHistory[r.key] = []; });
     }
     const currentRoundKey = ROUNDS[saved.roundIdx].key;
     const currentQId = saved.roundQuestionIds[currentRoundKey][saved.posInRound];
@@ -518,7 +519,10 @@ const App = (() => {
     ROUNDS.forEach(r => {
       const ids = shuffle(r.questions.map(q=>q.id)).slice(0, QUESTIONS_PER_ROUND);
       roundQuestionIds[r.key] = ids;
-      roundHistory[r.key] = ids.slice(); // seed history — these are already "presented" for skip-exclusion purposes
+      // History starts empty — it tracks what's actually been shown, not what's
+      // merely scheduled. Entries are added in startAnswering(), the single
+      // place a question is first rendered to the player.
+      roundHistory[r.key] = [];
     });
     pendingAnswer = null; pendingPrediction = null; pendingReveal = null;
     phase = 'roundIntro';
@@ -560,6 +564,14 @@ const App = (() => {
     phase = 'answering';
     const r = currentRound();
     const q = currentQuestion();
+    // This is the single place a question is actually rendered to the player.
+    // Record it in history right here — not when it's merely scheduled — and
+    // only once (skip re-adds nothing if resuming back onto the same question).
+    if (!roundHistory[r.key]) roundHistory[r.key] = [];
+    if (!roundHistory[r.key].includes(q.id)) {
+      roundHistory[r.key].push(q.id);
+      saveState();
+    }
     document.getElementById('ansRoundLabel').textContent = `Round ${r.key} · ${r.name}`;
     document.getElementById('ansProgressText').textContent = `${posInRound+1} / ${QUESTIONS_PER_ROUND}`;
     document.getElementById('ansProgressFill').style.width = `${((posInRound+1)/QUESTIONS_PER_ROUND)*100}%`;
@@ -755,26 +767,54 @@ const App = (() => {
   }
 
   function skipQuestion() {
-    // Replace the current question with one that has never been presented
-    // this session — checked against the full session history (roundHistory),
-    // not just the 9 currently-queued slots, so a question skipped away from
-    // earlier can't resurface later as a "new" one. Only if the entire round
-    // bank has genuinely been presented already do we allow reuse.
+    // Replace the current question with one that has never actually been
+    // shown this session (checked against roundHistory, which now only
+    // contains questions that were really rendered — see startAnswering()).
+    //
+    // A brand-new-and-unshown id is preferred, but it must ALSO not already
+    // be sitting, unshown, at one of this round's other queued positions —
+    // otherwise it would just repeat later when that position is naturally
+    // reached. If nothing satisfies both, we SWAP the current slot with a
+    // later not-yet-shown slot instead of overwriting it, so the round's 9
+    // slots always remain 9 distinct, still-valid questions. Only once every
+    // question in the round's full bank has actually appeared do we permit
+    // reuse.
     const r = currentRound();
     const bankIds = r.questions.map(q => q.id);
     const history = roundHistory[r.key] || [];
-    let excluded = new Set(history);
-    let alt = bankIds.find(id => !excluded.has(id));
-    if (!alt) {
-      // Bank genuinely exhausted for this round this session — reset history
-      // so play can continue, preferring not to immediately repeat the exact
-      // question just skipped.
-      const currentId = roundQuestionIds[r.key][posInRound];
-      roundHistory[r.key] = [];
-      alt = bankIds.find(id => id !== currentId) || bankIds[0];
+    const excluded = new Set(history);
+    const currentlyQueued = new Set(roundQuestionIds[r.key]);
+
+    let alt = bankIds.find(id => !excluded.has(id) && !currentlyQueued.has(id));
+    if (alt !== undefined) {
+      roundQuestionIds[r.key][posInRound] = alt;
+      saveState();
+      startAnswering();
+      return;
     }
-    roundQuestionIds[r.key][posInRound] = alt;
-    roundHistory[r.key] = (roundHistory[r.key] || []).concat(alt);
+
+    // Nothing unshown outside the queue — look for a not-yet-shown question
+    // already queued at a later, not-yet-reached position, and swap it in.
+    const laterIdx = roundQuestionIds[r.key].findIndex((id, idx) => idx > posInRound && !excluded.has(id));
+    if (laterIdx !== -1) {
+      const swapId = roundQuestionIds[r.key][laterIdx];
+      const displaced = roundQuestionIds[r.key][posInRound];
+      roundQuestionIds[r.key][laterIdx] = displaced;
+      roundQuestionIds[r.key][posInRound] = swapId;
+      saveState();
+      startAnswering();
+      return;
+    }
+
+    // Genuine exhaustion: every question in this round's bank has now
+    // actually appeared. Reuse is permitted here, preferring not to
+    // immediately repeat the exact question just skipped. History resets so
+    // play can keep cycling reasonably if skipping continues beyond this
+    // point, rather than getting stuck reusing the same one or two ids.
+    const currentId = roundQuestionIds[r.key][posInRound];
+    const reuse = bankIds.find(id => id !== currentId) || bankIds[0];
+    roundHistory[r.key] = [];
+    roundQuestionIds[r.key][posInRound] = reuse;
     saveState();
     startAnswering();
   }
