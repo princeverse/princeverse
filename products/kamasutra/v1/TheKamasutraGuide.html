@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Kamasutra Guide — After.9 Collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #120e10; --bg-2: #1c1417; --bg-3: #241a1e;
+    --wine: #8a2332; --wine-light: #b23a4a; --gold: #c9a15a;
+    --cream: #f4ead9; --cream-dim: #baac97; --line: rgba(244,234,217,0.14);
+    --focus: #e7c78a;
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-l: env(safe-area-inset-left, 0px);
+    --safe-r: env(safe-area-inset-right, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--cream);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overscroll-behavior: none;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; min-height: 100dvh;
+    background-image:
+      radial-gradient(ellipse 800px 500px at 100% -10%, rgba(138,35,50,0.32), transparent),
+      radial-gradient(ellipse 700px 500px at 0% 110%, rgba(201,161,90,0.10), transparent);
+  }
+  .app {
+    width: 100%; max-width: 480px; height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+    padding-top: var(--safe-t); padding-bottom: var(--safe-b);
+  }
+  .screen {
+    flex: 1; min-height: 0; display: none; flex-direction: column;
+    padding: clamp(18px,4vw,32px) max(20px, calc(var(--safe-l) + 16px)) 0 max(20px, calc(var(--safe-r) + 16px));
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.active { display: flex; }
+
+  .kicker { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); font-weight: 600; text-align: center; margin-bottom: 6px; }
+
+  #cover { justify-content: center; text-align: center; }
+  #cover .title { font-family:'Fraunces',serif; font-weight:600; font-size: clamp(28px, 8.5vw, 40px); line-height:1.14; color: var(--cream); margin:0 0 14px 0; overflow-wrap: break-word; }
+  #cover .tagline { font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size: clamp(14px,3.6vw,16px); color: var(--gold); margin:0 0 24px 0; }
+  #cover .desc { font-size: clamp(13px,3.6vw,14.5px); line-height:1.6; color: var(--cream-dim); margin:0 0 28px 0; max-width:360px; margin-left:auto; margin-right:auto; }
+  .statRow { display:flex; justify-content:center; gap: clamp(18px,5vw,30px); margin: 0 0 28px 0; }
+  .statItem { text-align:center; }
+  .statNum { font-family:'Fraunces',serif; font-weight:600; font-size: clamp(20px,5.5vw,26px); color: var(--gold); display:block; }
+  .statLabel { font-size: 10.5px; letter-spacing:0.8px; text-transform:uppercase; color: var(--cream-dim); }
+
+  .btn {
+    border: none; border-radius: 100px; padding: 16px 24px;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: clamp(13px,3.6vw,14.5px);
+    letter-spacing: 0.3px; cursor: pointer; width: 100%;
+  }
+  .btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .btn-primary { background: linear-gradient(135deg, var(--wine-light), var(--wine)); color: var(--cream); box-shadow: 0 8px 24px rgba(138,35,50,0.35); }
+  .btn-ghost { background: transparent; color: var(--cream-dim); border: 1px solid var(--line); }
+  .btn-gold { background: linear-gradient(135deg, #dcb96f, var(--gold)); color: #1c1417; box-shadow: 0 8px 24px rgba(201,161,90,0.3); }
+  #toggles { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+  #toggles button, #toggles .linkBtn { flex: 1 1 auto; min-width: 0; }
+  .linkBtn { background:none; border:none; color: var(--gold); font-size: 13px; text-decoration: underline; cursor: pointer; padding: 8px 4px; }
+  .linkBtn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+  #infoBox { display:none; text-align:left; background:var(--bg-2); border:1px solid var(--line); border-radius:14px; padding:18px; margin-top:16px; font-size:13px; line-height:1.7; color:var(--cream-dim); }
+  #infoBox.open { display:block; }
+  #infoBox h3 { font-family:'Fraunces',serif; font-size:15px; color:var(--cream); margin:0 0 8px 0; }
+  #infoBox h3.second { margin-top:16px; }
+  #infoBox ul { margin:0; padding-left:18px; }
+  #infoBox li { margin-bottom:6px; }
+  .consentLine { font-size:12.5px; color:var(--gold); text-align:center; margin-top:16px; line-height:1.6; }
+
+  /* BROWSE */
+  #browse .browseHead { text-align:center; margin-bottom: 14px; }
+  #browse .browseHead h2 { font-family:'Fraunces',serif; font-weight:600; font-size: clamp(20px,5.5vw,24px); margin: 4px 0 0 0; }
+  .searchRow { display:flex; gap:8px; margin-bottom:12px; }
+  .searchInput {
+    flex:1; min-width:0; background: var(--bg-2); border:1px solid var(--line); border-radius:100px;
+    padding: 11px 16px; color: var(--cream); font-family:'Inter',sans-serif; font-size:13.5px;
+  }
+  .searchInput::placeholder { color: var(--cream-dim); }
+  .searchInput:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+  .iconBtn {
+    flex-shrink:0; width:42px; height:42px; border-radius:50%; border:1px solid var(--line);
+    background: var(--bg-2); color: var(--gold); font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .iconBtn.active { background: linear-gradient(135deg, var(--wine-light), var(--wine)); color: var(--cream); border-color: transparent; }
+  .iconBtn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  .filterGroup { margin-bottom: 12px; }
+  .filterGroup .glabel { font-size: 10.5px; letter-spacing:1.2px; text-transform:uppercase; color: var(--cream-dim); margin-bottom:7px; font-weight:600; }
+  .chipRow { display:flex; gap:7px; flex-wrap:wrap; }
+  .chip {
+    background: var(--bg-2); border:1px solid var(--line); color: var(--cream-dim);
+    border-radius:100px; padding:7px 13px; font-size:12px; font-family:'Inter',sans-serif;
+    cursor:pointer; font-weight:500;
+  }
+  .chip.on { background: linear-gradient(135deg, var(--wine-light), var(--wine)); color: var(--cream); border-color: transparent; }
+  .chip:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  .surpriseRow { margin: 4px 0 16px 0; }
+
+  .resultCount { font-size:11.5px; color: var(--cream-dim); text-align:center; margin-bottom:12px; }
+
+  .chapterLabel {
+    font-family:'Fraunces',serif; font-style:italic; font-size:13.5px; color: var(--gold);
+    margin: 18px 0 8px 0; padding-bottom:6px; border-bottom:1px solid var(--line);
+  }
+  .chapterLabel:first-of-type { margin-top:2px; }
+
+  .posCard {
+    width:100%; text-align:left; background: var(--bg-2); border:1px solid var(--line);
+    border-radius:14px; padding:14px 16px; margin-bottom:9px; cursor:pointer;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .posCard:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .posCardMain { min-width:0; flex:1; }
+  .posName { font-family:'Fraunces',serif; font-weight:600; font-size:15.5px; color: var(--cream); margin:0 0 2px 0; }
+  .posAlt { font-size:11px; color: var(--cream-dim); font-style:italic; margin: 0 0 6px 0; }
+  .posTag { font-size:12px; color: var(--cream-dim); line-height:1.4; }
+  .posHeart { flex-shrink:0; font-size:18px; background:none; border:none; cursor:pointer; color: var(--line); padding:4px; }
+  .posHeart.on { color: var(--wine-light); }
+  .posHeart:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius:4px; }
+
+  .emptyState { text-align:center; padding: 40px 10px; color: var(--cream-dim); font-size:13.5px; line-height:1.7; }
+
+  /* DETAIL */
+  #detail .detailTop { display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px; }
+  .backBtn { background:none; border:none; color: var(--gold); font-size:13px; cursor:pointer; padding:6px 2px; font-weight:600; }
+  .backBtn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius:4px; }
+  .detailHeart { background:none; border:1px solid var(--line); border-radius:50%; width:40px; height:40px; font-size:18px; color: var(--line); cursor:pointer; }
+  .detailHeart.on { color: var(--wine-light); border-color: var(--wine-light); }
+  .detailHeart:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  .dChapter { font-size: 11px; letter-spacing:2px; text-transform:uppercase; color: var(--gold); font-weight:600; margin-bottom:6px; }
+  .dName { font-family:'Fraunces',serif; font-weight:600; font-size: clamp(24px,7vw,30px); color: var(--cream); margin:0 0 4px 0; line-height:1.15; }
+  .dAlt { font-size:13px; font-style:italic; color: var(--cream-dim); margin:0 0 16px 0; }
+
+  .tagChips { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:20px; }
+  .tagChip { background: var(--bg-2); border:1px solid var(--line); border-radius:100px; padding:6px 12px; font-size:11.5px; color: var(--cream-dim); }
+  .tagChip b { color: var(--gold); font-weight:600; }
+
+  .dDesc { font-size: clamp(14px,3.8vw,15px); line-height:1.75; color: var(--cream); margin-bottom:18px; }
+
+  .tipBox { background: var(--bg-2); border:1px solid var(--line); border-left: 3px solid var(--gold); border-radius:10px; padding:14px 16px; margin-bottom: 26px; }
+  .tipBox .tipLabel { font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color: var(--gold); font-weight:600; margin-bottom:5px; }
+  .tipBox .tipText { font-size:13px; line-height:1.6; color: var(--cream-dim); }
+
+  .detailActions { display:flex; gap:10px; padding-bottom: 24px; }
+
+  .footNote { text-align:center; font-size:11px; color: var(--cream-dim); opacity:0.7; padding: 12px max(0px, var(--safe-l)) calc(12px + var(--safe-b)) max(0px, var(--safe-r)); border-top: 1px solid var(--line); flex-shrink:0; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- COVER -->
+  <div class="screen active" id="cover">
+    <div class="kicker">After.9 Collection</div>
+    <div class="title">The Kamasutra<br>Guide</div>
+    <div class="tagline">36 positions. Browse together, or alone.</div>
+    <div class="desc">A filterable reference, not a game — sort by energy, flexibility, or experience level, favorite what you like, and come back to it anytime.</div>
+    <div class="statRow">
+      <div class="statItem"><span class="statNum">36</span><span class="statLabel">Positions</span></div>
+      <div class="statItem"><span class="statNum">3</span><span class="statLabel">Chapters</span></div>
+      <div class="statItem"><span class="statNum">3</span><span class="statLabel">Filters</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="App.enterBrowse()">Browse the Guide</button>
+    <div id="toggles">
+      <button class="linkBtn" onclick="App.toggleInfo()">How to use this guide</button>
+    </div>
+    <div id="infoBox">
+      <h3>How This Works</h3>
+      <ul>
+        <li>Filter by energy level, flexibility required, or experience level — or leave every filter on "All" and just browse.</li>
+        <li>Tap any entry to open its full description and a comfort tip.</li>
+        <li>Favorite the ones you like — they're saved on this device and easy to filter back to.</li>
+        <li>"Surprise Me" jumps to a random entry within whatever filters are active.</li>
+      </ul>
+      <h3 class="second">A Note on the Content</h3>
+      <ul>
+        <li>Every entry is written descriptively, never graphically — this is a guide, not explicit material.</li>
+        <li>Names in this guide are original, written for clarity and consistency, with a familiar alternate name noted where one exists.</li>
+        <li>Nothing here is a substitute for communication — check in with each other, always.</li>
+      </ul>
+      <div class="consentLine">Every position here is optional to try, at any pace, for as long or as short as feels right — no explanation ever needed.</div>
+    </div>
+  </div>
+
+  <!-- BROWSE -->
+  <div class="screen" id="browse">
+    <div class="browseHead">
+      <div class="kicker">The Kamasutra Guide</div>
+    </div>
+    <div class="searchRow">
+      <input class="searchInput" id="searchInput" type="text" placeholder="Search by name…" oninput="App.setSearch(this.value)" aria-label="Search positions by name">
+      <button class="iconBtn" id="favToggleBtn" onclick="App.toggleFavOnly()" aria-label="Show favorites only" title="Favorites only">&#9829;</button>
+    </div>
+    <div class="filterGroup">
+      <div class="glabel">Energy</div>
+      <div class="chipRow" id="energyChips"></div>
+    </div>
+    <div class="filterGroup">
+      <div class="glabel">Flexibility</div>
+      <div class="chipRow" id="flexChips"></div>
+    </div>
+    <div class="filterGroup">
+      <div class="glabel">Experience</div>
+      <div class="chipRow" id="expChips"></div>
+    </div>
+    <div class="surpriseRow">
+      <button class="btn btn-gold" onclick="App.surpriseMe()">Surprise Me</button>
+    </div>
+    <div class="resultCount" id="resultCount"></div>
+    <div id="resultsList"></div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="screen" id="detail">
+    <div class="detailTop">
+      <button class="backBtn" onclick="App.backToBrowse()">&larr; Back to Guide</button>
+      <button class="detailHeart" id="detailHeartBtn" onclick="App.toggleFavoriteCurrent()" aria-label="Favorite this position">&#9829;</button>
+    </div>
+    <div class="dChapter" id="dChapter">Foundations</div>
+    <div class="dName" id="dName">—</div>
+    <div class="dAlt" id="dAlt"></div>
+    <div class="tagChips" id="dTagChips"></div>
+    <div class="dDesc" id="dDesc"></div>
+    <div class="tipBox">
+      <div class="tipLabel">Comfort Tip</div>
+      <div class="tipText" id="dTip"></div>
+    </div>
+    <div class="detailActions">
+      <button class="btn btn-ghost" onclick="App.surpriseMe()">Another Surprise</button>
+      <button class="btn btn-primary" onclick="App.backToBrowse()">Back to Guide</button>
+    </div>
+  </div>
+
+  <div class="footNote">After.9 &middot; Descriptive, never graphic. Always optional.</div>
+</div>
+
+<script>
+/* ============================================================
+   Position bank. Every entry is written descriptively — body
+   positioning, support, and pacing — never anatomically or
+   graphically. Names are original to this guide; a familiar
+   alternate name is noted where one commonly exists. See
+   PRODUCT_NOTES.md for the content standard this bank follows.
+   ============================================================ */
+const CHAPTERS = {
+  1: 'Foundations',
+  2: 'Deepening',
+  3: 'Uncharted'
+};
+
+const DATA = [
+  // ---------- FOUNDATIONS (gentle / low / beginner) ----------
+  { id:'f1', ch:1, name:'The Anchor', alt:'a classic face-to-face', energy:'gentle', flex:'low', exp:'beginner',
+    tag:'Grounded and close, eye contact the whole way through.',
+    desc:"Lying face to face, one partner settles between the other's legs, weight supported on forearms so nothing feels rushed or heavy. Hips stay level and close, with the pace set by whoever's underneath.",
+    tip:'A pillow under the lower back keeps the angle comfortable for longer stretches.' },
+  { id:'f2', ch:1, name:'Slow Tide', alt:'spooning', energy:'gentle', flex:'low', exp:'beginner',
+    tag:'Side by side, barely any effort, built for unhurried mornings.',
+    desc:'Both partners lie on their sides facing the same direction, the one behind curled in close. Movement stays small and slow — this one rewards patience over pace.',
+    tip:'Tuck a pillow between the knees if the hips feel strained on one side.' },
+  { id:'f3', ch:1, name:'The Cradle', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'Seated closeness, arms wrapped all the way around.',
+    desc:"One partner sits back against pillows or a headboard with knees bent; the other settles into their lap facing them, legs wrapped around their waist. Hands stay free for holding, not balancing.",
+    tip:"Works just as well fully clothed — a good one for slowing things down mid-session." },
+  { id:'f4', ch:1, name:'Close Quarters', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'Seated, foreheads together, nowhere to look but at each other.',
+    desc:"Both partners sit cross-legged facing one another, knees overlapping, torsos pressed close. It's less about depth and more about proximity — foreheads touching, hands on each other's faces.",
+    tip:'A firm cushion under each set of hips makes cross-legged seating last longer.' },
+  { id:'f5', ch:1, name:'The Hollow', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'A lower, flatter spoon for total relaxation.',
+    desc:'Similar to Slow Tide but lying flatter, almost prone, with the partner behind draped fully along their back. Nothing here requires any real strength from either person.',
+    tip:'Good for winding down at the end of a night rather than starting one.' },
+  { id:'f6', ch:1, name:'Evening Light', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'Face to face, legs woven together, hands free.',
+    desc:"Both partners lie on their sides at the same height, facing each other, one leg draped over the other's hip so the lower bodies interlock. Faces stay close enough to talk quietly throughout.",
+    tip:'Raise the top leg slightly higher for a different angle without changing the position.' },
+  { id:'f7', ch:1, name:'The Nest', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'One partner reclined and supported, the other half-draped alongside.',
+    desc:'One partner lies back against a stack of pillows; the other settles half on top, half beside them, weight distributed rather than centered. It reads more like an embrace than a position.',
+    tip:"Extra pillows under the reclined partner's head and shoulders prevent neck strain." },
+  { id:'f8', ch:1, name:'Quiet Harbor', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'The simplest version — flat, close, hands clasped.',
+    desc:'Both partners lie flat, face to face, hands laced together at chest height. No elevation, no bracing — just closeness and steady eye contact.',
+    tip:'A good reset position if either partner wants to slow the whole encounter down.' },
+  { id:'f9', ch:1, name:'The Threshold', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'Standing, upright, weight resting on a wall or doorway.',
+    desc:'Both partners stand facing each other, one leaning back lightly against a wall or door frame for support. Little movement is needed — most of the connection comes from closeness and stillness.',
+    tip:'Keep knees soft rather than locked if standing for more than a minute or two.' },
+  { id:'f10', ch:1, name:'First Light', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'A gentle variation with one leg raised for a different angle.',
+    desc:"Built on The Anchor's foundation, with the receiving partner raising one leg slightly, resting it on the other's shoulder or hip. The added angle is subtle, not acrobatic.",
+    tip:"A folded towel or pillow under the raised leg's knee keeps it from tiring quickly." },
+  { id:'f11', ch:1, name:'The Warm Wrap', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'Fully entwined, blanket-close, made for staying still.',
+    desc:"Both partners lie on their sides, wrapped fully around one another — arms, legs, everything interlaced. It's closer to an extended embrace than a position with a distinct shape.",
+    tip:'Works well as a closing position after any other Foundations entry.' },
+  { id:'f12', ch:1, name:'Steady Ground', alt:null, energy:'gentle', flex:'low', exp:'beginner',
+    tag:'Kneeling, upright, torsos pressed close.',
+    desc:'Both partners kneel facing each other on a bed or soft surface, torsos pressed together, hands resting on shoulders or upper back for balance. The upright angle is a small step up from lying positions.',
+    tip:'A pillow under the knees makes this comfortable for longer than a minute or two.' },
+
+  // ---------- DEEPENING (moderate / medium / intermediate) ----------
+  { id:'d1', ch:2, name:'The Bridge', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'Hips elevated on pillows, a different angle without much effort.',
+    desc:'One partner reclines with hips raised on a stack of pillows or the edge of a bed; the other kneels facing them. The elevation noticeably changes the angle while either partner can still adjust the pace easily.',
+    tip:"Start with fewer pillows than you think you need — it's easy to add height, harder to reduce it fast." },
+  { id:'d2', ch:2, name:'Rising Tide', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'One seated at the edge, one kneeling or standing to meet them.',
+    desc:'One partner sits at the edge of a bed or sturdy chair; the other kneels or stands facing them. The height difference gives both partners a freer range of motion than lying flat.',
+    tip:'Check the seated surface is stable before settling in — a wobbly chair undercuts the whole thing.' },
+  { id:'d3', ch:2, name:'The Lotus Circle', alt:'also known as Yab-Yum', energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'Seated, wrapped around each other, chest to chest.',
+    desc:"One partner sits upright, legs crossed or extended; the other settles into their lap facing them, legs wrapped around their waist. Both stay upright and close, hands free to hold each other the entire time.",
+    tip:"Slow, rocking movement suits this position better than anything fast — it's built for eye contact." },
+  { id:'d4', ch:2, name:'Open Window', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'Legs raised and open, supported by an attentive partner.',
+    desc:'One partner lies back with knees drawn toward their chest, legs open; the other kneels close, using their arms to support the raised legs rather than leaving them to hold the position alone.',
+    tip:'Check in on comfort partway through — raised legs tire faster than either partner expects.' },
+  { id:'d5', ch:2, name:'The Turn', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'Side by side, partly rotated, one leg draped high.',
+    desc:"Both partners lie on their sides at a slight angle to one another rather than fully facing; the top leg drapes over the other's hip for a rotated, in-between angle.",
+    tip:'A pillow behind the lower back supports the twist without straining it.' },
+  { id:'d6', ch:2, name:'Second Wind', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'Rear-facing, kneeling, torsos close rather than distant.',
+    desc:"One partner kneels with torso upright; the other kneels close behind, chest nearly against their back rather than leaning far away. The closeness keeps it more intimate than the angle alone suggests.",
+    tip:"A hand at the front partner's hip or waist keeps the pace mutual, not one-sided." },
+  { id:'d7', ch:2, name:'The Perch', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'One seated on a raised surface, the other standing close.',
+    desc:'One partner sits on a counter, dresser, or sturdy table at a height that lines up comfortably; the other stands facing them. The elevation does the work that flexibility would otherwise need to.',
+    tip:'Confirm the surface can hold weight securely before using it — furniture height varies a lot.' },
+  { id:'d8', ch:2, name:'Shifting Sands', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'Reclining with hips turned slightly to one side.',
+    desc:"One partner reclines with hips rotated a little to one side rather than square to their partner, torso following partway. It's a small change from a flat position but shifts the angle meaningfully.",
+    tip:'Switch which side the hips turn toward halfway through for an easy variation.' },
+  { id:'d9', ch:2, name:'The Weave', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'Legs crossed and interlaced, side-facing.',
+    desc:'Both partners lie on their sides, facing each other, with legs crossed over one another in a scissor-like weave. It asks for a bit more coordination than fully parallel positions but stays low-effort overall.',
+    tip:'Move slowly at first to find where the legs settle comfortably before picking up any pace.' },
+  { id:'d10', ch:2, name:'Rising Vine', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'One kneeling upright, the other leaning back over their thighs.',
+    desc:"One partner kneels upright; the other reclines back over their thighs, supported by the kneeling partner's arms rather than their own core. It's a trust-forward position more than a strength-forward one.",
+    tip:'The kneeling partner should keep a firm grip at the hips or lower back throughout, not just at the start.' },
+  { id:'d11', ch:2, name:'The Overlook', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'Leaning forward on support, a moderate-angle approach from behind.',
+    desc:'One partner leans forward, supported on their forearms against a bed or cushioned surface; the other kneels close behind at a moderate, comfortable angle rather than a steep one.',
+    tip:"A pillow under the front partner's forearms or chest reduces strain over time." },
+  { id:'d12', ch:2, name:'Balanced Arch', alt:null, energy:'moderate', flex:'medium', exp:'intermediate',
+    tag:'A slight backbend, cushioned and supported.',
+    desc:'One partner reclines into a gentle backward arch, supported by a stack of pillows behind the shoulders and lower back; the other kneels close. The arch is shallow, not a full bend.',
+    tip:'Keep the pillow stack firm rather than soft so the arch holds its shape without sinking.' },
+
+  // ---------- UNCHARTED (intense / high / advanced) ----------
+  { id:'u1', ch:3, name:'The Suspension Bridge', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'Weight-bearing, braced against sturdy furniture.',
+    desc:'One partner braces against a sturdy piece of furniture — a bed frame, a solid chair — while the other supports a portion of their weight from behind. This one leans on strength and stability more than any Foundations or Deepening entry.',
+    tip:"Test the furniture's stability with your full weight before committing to the position." },
+  { id:'u2', ch:3, name:'The Standing Embrace', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'Fully standing, full weight support, built for strong arms.',
+    desc:"One partner is lifted and supported entirely by the other while standing, legs wrapped around their partner's waist. This asks a lot of the supporting partner's strength and balance and isn't one to hold for long stretches.",
+    tip:'Have a wall within reach for extra support, and swap out the moment either arm or leg starts shaking.' },
+  { id:'u3', ch:3, name:'The Wheel', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'A deep backbend, carefully supported throughout.',
+    desc:'One partner arches back deeply — hands or forearms reaching toward the floor or a low surface — while the other supports the movement closely. This is a flexibility-forward position that needs real warmup beforehand.',
+    tip:'Never attempt this cold — a few minutes of back stretching first makes a real difference.' },
+  { id:'u4', ch:3, name:'Full Bloom', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'Legs raised high, deep flexibility required.',
+    desc:'One partner lies back with both legs raised high and open, well past a Deepening-level stretch; the other kneels close, taking on more of the supporting role than usual. Deep hip and hamstring flexibility matters here.',
+    tip:'Worth skipping entirely if either partner has any hip or lower-back sensitivity.' },
+  { id:'u5', ch:3, name:'The Climb', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'One partner elevated on furniture, height-coordinated.',
+    desc:'One partner sits or reclines on a raised, stable surface — a bed at counter height, for instance — while the other stands to meet them. Getting the height right takes some trial and error the first time.',
+    tip:'Sort out furniture height before either partner is undressed — it saves an awkward pause later.' },
+  { id:'u6', ch:3, name:'Reverse Arch', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'Kneeling with a deep arch, hands reaching back.',
+    desc:"One partner kneels upright and arches back deeply enough to reach toward their ankles, held steady by the other's hands at the hips. It's one of the more visually dramatic entries and one of the more demanding ones.",
+    tip:'Hold for a few breaths rather than a full stretch of the encounter — deep arches tire quickly.' },
+  { id:'u7', ch:3, name:'The Counterweight', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'Standing, one leg lifted high, full partner support.',
+    desc:"Both partners stand; one lifts a single leg high while the other supports both the lifted leg and a good portion of their balance. It's closer to a partner-assisted stretch than a resting position.",
+    tip:'A wall or headboard nearby gives the standing, unsupported leg somewhere to brace.' },
+  { id:'u8', ch:3, name:'Edge of Balance', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'Seated on a furniture edge, legs wrapped high, core-engaged.',
+    desc:"One partner sits at the very edge of a bed or sturdy chair with legs wrapped high around the other, who stands or kneels close. It asks for real core engagement from the seated partner to hold the position.",
+    tip:"Keep the seated partner's hands free to brace against the furniture at any point." },
+  { id:'u9', ch:3, name:'The Deep Fold', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'Legs folded toward the chest, face to face, high flexibility.',
+    desc:'One partner folds their legs in close toward their chest while lying on their back, going noticeably deeper than Open Window; the other leans in close, face to face throughout. This is one of the more flexibility-demanding entries in the guide.',
+    tip:'Ease into the fold gradually rather than all at once — check comfort as you go, not just at the start.' },
+  { id:'u10', ch:3, name:'Skyward', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'Hips elevated high on a stacked support, standing partner.',
+    desc:"One partner's hips rest high on a stacked support — several pillows or a raised piece of furniture — while the other stands facing them. The height does most of the work; the flexibility asked of the elevated partner is what makes it advanced.",
+    tip:"Stack supports so they can't shift mid-position — nothing sturdy is worth rebuilding twice." },
+  { id:'u11', ch:3, name:'The Spiral', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'A rotated, twisted torso position — flexibility over strength.',
+    desc:'One partner lies with hips facing one direction and shoulders twisted to face the other, a deeper rotation than The Turn. It asks for spinal flexibility more than raw strength.',
+    tip:'Come out of the twist slowly afterward, the same way you would after a yoga pose.' },
+  { id:'u12', ch:3, name:'Full Embrace Standing', alt:null, energy:'intense', flex:'high', exp:'advanced',
+    tag:'A full standing carry — the most demanding entry in the guide.',
+    desc:"One partner carries the other's full body weight in a standing embrace, legs fully wrapped, no furniture involved. This is the most physically demanding entry in the collection and isn't meant to be held for long.",
+    tip:'Treat this as a highlight to move through, not a position to settle into — strength fades fast.' }
+];
+
+const LABELS = {
+  energy: { gentle:'Gentle', moderate:'Moderate', intense:'Intense' },
+  flex:   { low:'Low', medium:'Medium', high:'High' },
+  exp:    { beginner:'Beginner', intermediate:'Intermediate', advanced:'Advanced' }
+};
+
+const App = (() => {
+  const STORAGE_KEY = 'kamasutraGuideFavorites';
+  let favorites = new Set();
+  let filters = { energy:'all', flex:'all', exp:'all' };
+  let search = '';
+  let favOnly = false;
+  let currentId = null;
+
+  function loadFavorites() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        const validIds = new Set(DATA.map(p => p.id));
+        favorites = new Set(arr.filter(id => typeof id === 'string' && validIds.has(id)));
+      }
+    } catch (e) {}
+  }
+  function saveFavorites() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(favorites))); } catch (e) {}
+  }
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function toggleInfo() { document.getElementById('infoBox').classList.toggle('open'); }
+
+  function enterBrowse() {
+    show('browse');
+    renderFilterChips();
+    renderResults();
+  }
+
+  function backToBrowse() {
+    currentId = null;
+    show('browse');
+    renderResults();
+  }
+
+  function renderFilterChips() {
+    renderChipGroup('energyChips', 'energy', ['all','gentle','moderate','intense']);
+    renderChipGroup('flexChips', 'flex', ['all','low','medium','high']);
+    renderChipGroup('expChips', 'exp', ['all','beginner','intermediate','advanced']);
+    const favBtn = document.getElementById('favToggleBtn');
+    favBtn.classList.toggle('active', favOnly);
+  }
+
+  function renderChipGroup(containerId, key, values) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    values.forEach(v => {
+      const btn = document.createElement('button');
+      btn.className = 'chip' + (filters[key] === v ? ' on' : '');
+      btn.textContent = v === 'all' ? 'All' : LABELS[key][v];
+      btn.setAttribute('aria-pressed', filters[key] === v ? 'true' : 'false');
+      btn.onclick = () => { filters[key] = v; renderFilterChips(); renderResults(); };
+      el.appendChild(btn);
+    });
+  }
+
+  function setSearch(val) { search = val.trim().toLowerCase(); renderResults(); }
+
+  function toggleFavOnly() {
+    favOnly = !favOnly;
+    document.getElementById('favToggleBtn').classList.toggle('active', favOnly);
+    renderResults();
+  }
+
+  function matches(p) {
+    if (filters.energy !== 'all' && p.energy !== filters.energy) return false;
+    if (filters.flex !== 'all' && p.flex !== filters.flex) return false;
+    if (filters.exp !== 'all' && p.exp !== filters.exp) return false;
+    if (favOnly && !favorites.has(p.id)) return false;
+    if (search && !p.name.toLowerCase().includes(search) && !(p.alt || '').toLowerCase().includes(search)) return false;
+    return true;
+  }
+
+  function renderResults() {
+    const list = DATA.filter(matches);
+    const container = document.getElementById('resultsList');
+    const countEl = document.getElementById('resultCount');
+    container.innerHTML = '';
+
+    if (list.length === 0) {
+      countEl.textContent = '';
+      const empty = document.createElement('div');
+      empty.className = 'emptyState';
+      empty.textContent = favOnly
+        ? "No favorites match these filters yet. Browse and tap the heart on anything you like."
+        : "Nothing matches this combination — try loosening a filter.";
+      container.appendChild(empty);
+      return;
+    }
+
+    countEl.textContent = list.length + (list.length === 1 ? ' position' : ' positions');
+
+    let lastChapter = null;
+    list.forEach(p => {
+      if (p.ch !== lastChapter) {
+        lastChapter = p.ch;
+        const label = document.createElement('div');
+        label.className = 'chapterLabel';
+        label.textContent = CHAPTERS[p.ch];
+        container.appendChild(label);
+      }
+      container.appendChild(buildCard(p));
+    });
+  }
+
+  function buildCard(p) {
+    const card = document.createElement('button');
+    card.className = 'posCard';
+    card.setAttribute('aria-label', 'Open ' + p.name);
+    card.onclick = () => openDetail(p.id);
+
+    const main = document.createElement('div');
+    main.className = 'posCardMain';
+    const name = document.createElement('div');
+    name.className = 'posName';
+    name.textContent = p.name;
+    main.appendChild(name);
+    if (p.alt) {
+      const alt = document.createElement('div');
+      alt.className = 'posAlt';
+      alt.textContent = p.alt;
+      main.appendChild(alt);
+    }
+    const tag = document.createElement('div');
+    tag.className = 'posTag';
+    tag.textContent = p.tag;
+    main.appendChild(tag);
+
+    const heart = document.createElement('button');
+    heart.className = 'posHeart' + (favorites.has(p.id) ? ' on' : '');
+    heart.innerHTML = '&#9829;';
+    heart.setAttribute('aria-label', (favorites.has(p.id) ? 'Remove ' : 'Add ') + p.name + ' from favorites');
+    heart.onclick = (e) => { e.stopPropagation(); toggleFavorite(p.id); };
+
+    card.appendChild(main);
+    card.appendChild(heart);
+    return card;
+  }
+
+  function toggleFavorite(id) {
+    if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
+    saveFavorites();
+    renderResults();
+    if (currentId === id) updateDetailHeart();
+  }
+
+  function toggleFavoriteCurrent() { if (currentId) toggleFavorite(currentId); }
+
+  function updateDetailHeart() {
+    const btn = document.getElementById('detailHeartBtn');
+    btn.classList.toggle('on', favorites.has(currentId));
+  }
+
+  function openDetail(id) {
+    const p = DATA.find(x => x.id === id);
+    if (!p) return;
+    currentId = id;
+    document.getElementById('dChapter').textContent = CHAPTERS[p.ch];
+    document.getElementById('dName').textContent = p.name;
+    const altEl = document.getElementById('dAlt');
+    altEl.textContent = p.alt || '';
+    altEl.style.display = p.alt ? 'block' : 'none';
+    document.getElementById('dDesc').textContent = p.desc;
+    document.getElementById('dTip').textContent = p.tip;
+
+    const chipsEl = document.getElementById('dTagChips');
+    chipsEl.innerHTML = '';
+    [['Energy', LABELS.energy[p.energy]], ['Flexibility', LABELS.flex[p.flex]], ['Experience', LABELS.exp[p.exp]]].forEach(([label, val]) => {
+      const chip = document.createElement('div');
+      chip.className = 'tagChip';
+      chip.innerHTML = '<b>' + val + '</b> ' + label;
+      chipsEl.appendChild(chip);
+    });
+
+    updateDetailHeart();
+    show('detail');
+    document.getElementById('detail').scrollTop = 0;
+  }
+
+  function surpriseMe() {
+    let pool = DATA.filter(matches);
+    if (pool.length === 0) pool = DATA;
+    if (pool.length > 1 && currentId) pool = pool.filter(p => p.id !== currentId);
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    openDetail(pick.id);
+  }
+
+  function init() {
+    loadFavorites();
+  }
+
+  return { init, toggleInfo, enterBrowse, backToBrowse, setSearch, toggleFavOnly, toggleFavorite, toggleFavoriteCurrent, surpriseMe };
+})();
+
+App.init();
+</script>
+</body>
+</html>
