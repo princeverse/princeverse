@@ -14,6 +14,15 @@ checks from the first pass are unchanged and still hold.
 
 **Not tested:** real Safari/WebKit (same limitation as the After.9 products — no WebKit engine available in this environment; the CSS uses the same broadly-supported patterns already used there, so risk is low but unconfirmed).
 
+## Decorative pass — re-verified
+
+After adding the geometric lotus/mandala cover ornament, the three-stage
+chapter icons (bud/half-bloom/full-bloom, used on both the browse list and
+detail screen), the drop-cap description treatment, and the ornamental
+divider, the full 33-check Playwright suite above was rerun from scratch.
+**All 33 still pass, including all 18 overflow checks at every required
+width** — the new decorative elements introduced no layout regressions.
+
 ## What was checked (static pass)
 
 - **JS syntax** — inline script extracted and validated with `node --check`. Passed. (One bug — a stray Python-style ternary left over from drafting — was caught and fixed before this check.)
