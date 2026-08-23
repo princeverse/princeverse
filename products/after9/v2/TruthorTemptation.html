@@ -388,7 +388,8 @@ const DECK = {
 
 const LEVEL_NAMES = { 1: "Warm Up", 2: "Heating Up", 3: "After.9" };
 const LEVEL_UP_AT = { 1: 12, 2: 24 };
-const STORAGE_KEY = "after9_truth_or_temptation_v1";
+const STORAGE_KEY = "after9_truth_or_temptation_v2";
+const STORAGE_VERSION = 2;
 
 const App = (() => {
   let level = 1, turns = 0, score = 0, scoringOn = false;
@@ -396,6 +397,7 @@ const App = (() => {
   let usedFlat = {};    // "category:level:index" -> true, for lifetime-of-session no-repeat tracking
   let currentCategory = null;
   let currentIdx = null;
+  let phase = 'choice'; // 'choice' | 'reveal' — persisted so a mid-prompt refresh can restore it
   let pendingModalAction = null;
 
   function shuffleIdx(n) {
@@ -414,18 +416,54 @@ const App = (() => {
       temptation: {1:shuffleIdx(DECK.temptation[1].length), 2:shuffleIdx(DECK.temptation[2].length), 3:shuffleIdx(DECK.temptation[3].length)}
     };
     usedFlat = {};
+    currentCategory = null; currentIdx = null;
+    phase = 'choice';
   }
 
   function saveState() {
-    const data = { level, turns, score, scoringOn, pools, usedFlat };
+    const data = { v: STORAGE_VERSION, level, turns, score, scoringOn, pools, usedFlat, phase, currentCategory, currentIdx };
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  }
+
+  // Treat localStorage as untrusted: validate shape, types, and ranges before
+  // ever using a saved value. Returns null (never throws) if anything is off,
+  // which callers treat as "no usable saved state."
+  function isIdxArray(a, max) {
+    return Array.isArray(a) && a.every(n => Number.isInteger(n) && n >= 0 && n < max);
+  }
+  function validatePools(pools) {
+    if (!pools || typeof pools !== 'object') return false;
+    for (const cat of ['truth', 'temptation']) {
+      if (!pools[cat] || typeof pools[cat] !== 'object') return false;
+      for (const lvl of [1, 2, 3]) {
+        if (!isIdxArray(pools[cat][lvl], DECK[cat][lvl].length)) return false;
+      }
+    }
+    return true;
+  }
+  function validateState(saved) {
+    if (!saved || typeof saved !== 'object') return null;
+    if (saved.v !== STORAGE_VERSION) return null; // incompatible/old version — discard rather than risk misreading it
+    if (![1, 2, 3].includes(saved.level)) return null;
+    if (!Number.isInteger(saved.turns) || saved.turns < 0) return null;
+    if (!Number.isInteger(saved.score) || saved.score < 0) return null;
+    if (typeof saved.scoringOn !== 'boolean') return null;
+    if (!validatePools(saved.pools)) return null;
+    if (!saved.usedFlat || typeof saved.usedFlat !== 'object' || Array.isArray(saved.usedFlat)) return null;
+    if (saved.phase !== 'choice' && saved.phase !== 'reveal') return null;
+    if (saved.phase === 'reveal') {
+      if (saved.currentCategory !== 'truth' && saved.currentCategory !== 'temptation') return null;
+      const bankLen = DECK[saved.currentCategory][saved.level] ? DECK[saved.currentCategory][saved.level].length : 0;
+      if (!Number.isInteger(saved.currentIdx) || saved.currentIdx < 0 || saved.currentIdx >= bankLen) return null;
+    }
+    return saved;
   }
 
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
-      return JSON.parse(raw);
+      return validateState(JSON.parse(raw));
     } catch(e) { return null; }
   }
 
@@ -442,20 +480,34 @@ const App = (() => {
 
   function init() {
     const saved = loadState();
-    if (saved && saved.turns > 0) {
+    // "In progress" = at least one turn played, OR a prompt is currently
+    // on screen (phase 'reveal') even before the first turn commits.
+    if (saved && (saved.turns > 0 || saved.phase === 'reveal')) {
       level = saved.level; turns = saved.turns; score = saved.score;
       scoringOn = saved.scoringOn; pools = saved.pools; usedFlat = saved.usedFlat || {};
+      phase = saved.phase; currentCategory = saved.currentCategory; currentIdx = saved.currentIdx;
       document.getElementById('resumeDesc').textContent =
         `Level ${level} · ${LEVEL_NAMES[level]} — ${turns} turn${turns===1?'':'s'} played${scoringOn ? `, score ${score}` : ''}.`;
       show('resumeScreen');
     } else {
+      clearState(); // malformed/incompatible/empty — start clean rather than risk a broken mid-state
       show('cover');
     }
   }
 
   function resume() {
-    renderChoiceScreen();
-    show('choice');
+    if (phase === 'reveal' && currentCategory && DECK[currentCategory][level] && DECK[currentCategory][level][currentIdx] !== undefined) {
+      // Restore the exact prompt that was on screen — never redraw, that would
+      // silently swap in a different prompt and desync the "used" tracking.
+      document.getElementById('rCatLabel').textContent = currentCategory.toUpperCase();
+      document.getElementById('rCatLabel').className = 'catLabel ' + currentCategory;
+      document.getElementById('rText').textContent = DECK[currentCategory][level][currentIdx];
+      show('reveal');
+    } else {
+      phase = 'choice';
+      renderChoiceScreen();
+      show('choice');
+    }
   }
 
   function startFresh(withScoring) {
@@ -510,6 +562,8 @@ const App = (() => {
     currentCategory = category;
     const drawn = drawFrom(category);
     currentIdx = drawn.idx;
+    phase = 'reveal';
+    saveState(); // persist immediately — a refresh while this prompt is visible must restore it exactly
     document.getElementById('rCatLabel').textContent = category.toUpperCase();
     document.getElementById('rCatLabel').className = 'catLabel ' + category;
     document.getElementById('rText').textContent = drawn.text;
@@ -523,6 +577,9 @@ const App = (() => {
     turns++;
     if (turns === LEVEL_UP_AT[1] && level === 1) level = 2;
     else if (turns === LEVEL_UP_AT[2] && level === 2) level = 3;
+    // Turn committed — clear the temporary "prompt on screen" pointer.
+    currentCategory = null; currentIdx = null;
+    phase = 'choice';
     saveState();
     renderChoiceScreen();
     show('choice');

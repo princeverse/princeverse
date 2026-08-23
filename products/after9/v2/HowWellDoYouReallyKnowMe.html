@@ -394,7 +394,9 @@ const ROUNDS = [
   }
 ];
 const QUESTIONS_PER_ROUND = 9;
-const STORAGE_KEY = "after9_how_well_v2";
+const STORAGE_KEY = "after9_how_well_v3";
+const STORAGE_VERSION = 3;
+const VALID_PHASES = ['roundIntro','consentCheckpoint','handoffAnswer','answering','handoffPredict','predicting','reveal','roundEnd'];
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -412,8 +414,10 @@ function findQuestion(roundKey, id) {
 const App = (() => {
   let roundIdx = 0, posInRound = 0, turn = 'A', score = 0, maxScore = 0;
   let roundQuestionIds = {};
-  let pendingAnswer = null; // { value } cleared after reveal
+  let roundHistory = {};      // every question id ever placed into a round's slots this session — skip exclusion list, never shrinks except on genuine bank exhaustion
+  let pendingAnswer = null;   // { value } — transient, private; deleted the moment the reveal screen is left
   let pendingPrediction = null;
+  let pendingReveal = null;   // the already-computed reveal result (tier/points/display strings) so a refresh on the reveal screen redisplays instead of rescoring
   let phase = 'cover';
   let pendingModalAction = null;
 
@@ -426,12 +430,66 @@ const App = (() => {
   function saveState() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        roundIdx, posInRound, turn, score, maxScore, roundQuestionIds, pendingAnswer, pendingPrediction, phase
+        v: STORAGE_VERSION, roundIdx, posInRound, turn, score, maxScore,
+        roundQuestionIds, roundHistory, pendingAnswer, pendingPrediction, pendingReveal, phase
       }));
     } catch(e) {}
   }
+
+  // Treat localStorage as untrusted: every restored value is checked against
+  // the current ROUNDS data before use. Anything malformed, out of range, or
+  // from an incompatible version is discarded rather than risking a broken
+  // resume (e.g. reconstructing a reveal that was never actually scored).
+  function isValidIdArray(arr, roundKey, opts) {
+    opts = opts || {};
+    if (!Array.isArray(arr)) return false;
+    if (opts.exactLength != null && arr.length !== opts.exactLength) return false;
+    const r = ROUNDS.find(rr => rr.key === roundKey);
+    if (!r) return false;
+    const validIds = new Set(r.questions.map(q => q.id));
+    return arr.every(id => typeof id === 'string' && validIds.has(id));
+  }
+  function validateState(saved) {
+    if (!saved || typeof saved !== 'object') return null;
+    if (saved.v !== STORAGE_VERSION) return null;
+    if (!Number.isInteger(saved.roundIdx) || saved.roundIdx < 0 || saved.roundIdx >= ROUNDS.length) return null;
+    if (!Number.isInteger(saved.posInRound) || saved.posInRound < 0 || saved.posInRound >= QUESTIONS_PER_ROUND) return null;
+    if (saved.turn !== 'A' && saved.turn !== 'B') return null;
+    if (!Number.isInteger(saved.score) || saved.score < 0) return null;
+    if (!Number.isInteger(saved.maxScore) || saved.maxScore < 0 || saved.score > saved.maxScore) return null;
+    if (!VALID_PHASES.includes(saved.phase)) return null;
+    if (!saved.roundQuestionIds || typeof saved.roundQuestionIds !== 'object') return null;
+    for (const r of ROUNDS) {
+      if (!isValidIdArray(saved.roundQuestionIds[r.key], r.key, { exactLength: QUESTIONS_PER_ROUND })) return null;
+    }
+    // roundHistory is allowed to be missing (older-but-same-version edge case) —
+    // reseed it from roundQuestionIds rather than fail the whole restore.
+    if (saved.roundHistory && typeof saved.roundHistory === 'object') {
+      for (const r of ROUNDS) {
+        const h = saved.roundHistory[r.key];
+        if (h !== undefined && !isValidIdArray(h, r.key)) return null;
+      }
+    } else {
+      saved.roundHistory = {};
+      ROUNDS.forEach(r => { saved.roundHistory[r.key] = saved.roundQuestionIds[r.key].slice(); });
+    }
+    const currentRoundKey = ROUNDS[saved.roundIdx].key;
+    const currentQId = saved.roundQuestionIds[currentRoundKey][saved.posInRound];
+    if (saved.phase === 'reveal') {
+      const pr = saved.pendingReveal;
+      if (!pr || typeof pr !== 'object') return null;
+      if (pr.questionId !== currentQId) return null; // must match the question this position actually points to
+      if (!['nailed','close','miss'].includes(pr.tier)) return null;
+      if (typeof pr.points !== 'number' || pr.points < 0 || pr.points > 2) return null;
+      if (typeof pr.realDisplay !== 'string' && typeof pr.realDisplay !== 'number') return null;
+      if (typeof pr.guessDisplay !== 'string' && typeof pr.guessDisplay !== 'number') return null;
+      if (pr.whoAnswered !== 'A' && pr.whoAnswered !== 'B') return null;
+    }
+    return saved;
+  }
+
   function loadState() {
-    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? validateState(JSON.parse(raw)) : null; } catch(e) { return null; }
   }
   function clearState() { try { localStorage.removeItem(STORAGE_KEY); } catch(e) {} }
 
@@ -440,12 +498,14 @@ const App = (() => {
     if (saved && saved.phase && saved.phase !== 'cover' && saved.phase !== 'finalResult') {
       roundIdx = saved.roundIdx; posInRound = saved.posInRound; turn = saved.turn;
       score = saved.score; maxScore = saved.maxScore; roundQuestionIds = saved.roundQuestionIds;
-      pendingAnswer = saved.pendingAnswer; pendingPrediction = saved.pendingPrediction; phase = saved.phase;
+      roundHistory = saved.roundHistory; pendingAnswer = saved.pendingAnswer;
+      pendingPrediction = saved.pendingPrediction; pendingReveal = saved.pendingReveal; phase = saved.phase;
       const r = ROUNDS[roundIdx];
       document.getElementById('resumeDesc').textContent =
         `${r.name} — question ${posInRound+1} of ${QUESTIONS_PER_ROUND}, compatibility ${score}/${maxScore || 1}.`;
       show('resumeScreen');
     } else {
+      clearState(); // missing/malformed/incompatible — start clean rather than risk a broken resume
       show('cover');
     }
   }
@@ -454,9 +514,13 @@ const App = (() => {
 
   function startFresh() {
     roundIdx = 0; posInRound = 0; turn = 'A'; score = 0; maxScore = 0;
-    roundQuestionIds = {};
-    ROUNDS.forEach(r => { roundQuestionIds[r.key] = shuffle(r.questions.map(q=>q.id)).slice(0, QUESTIONS_PER_ROUND); });
-    pendingAnswer = null; pendingPrediction = null;
+    roundQuestionIds = {}; roundHistory = {};
+    ROUNDS.forEach(r => {
+      const ids = shuffle(r.questions.map(q=>q.id)).slice(0, QUESTIONS_PER_ROUND);
+      roundQuestionIds[r.key] = ids;
+      roundHistory[r.key] = ids.slice(); // seed history — these are already "presented" for skip-exclusion purposes
+    });
+    pendingAnswer = null; pendingPrediction = null; pendingReveal = null;
     phase = 'roundIntro';
     saveState();
     renderRoundIntro();
@@ -577,6 +641,11 @@ const App = (() => {
   }
 
   function computeReveal() {
+    // Scoring happens exactly once, right here, at the moment the prediction
+    // is locked in. The result is captured into pendingReveal and persisted;
+    // resuming onto the reveal screen later only ever re-renders that stored
+    // result — it never re-runs this function, so score/maxScore can never
+    // be double-counted by a refresh.
     const q = currentQuestion();
     const real = pendingAnswer.value, guess = pendingPrediction.value;
     let tier, points, maxPoints = 2;
@@ -591,26 +660,35 @@ const App = (() => {
     }
     score += points; maxScore += maxPoints;
 
-    document.getElementById('revLabelA').textContent = `${whoLabel(turn)} said`;
-    document.getElementById('revValA').textContent = q.format === 'rating' ? real : real;
-    document.getElementById('revLabelB').textContent = `${whoLabel(otherOf(turn))} guessed`;
-    document.getElementById('revValB').textContent = q.format === 'rating' ? guess : guess;
-
-    const badge = document.getElementById('resultBadge');
-    badge.className = 'resultBadge fade-in ' + tier;
-    badge.textContent = tier === 'nailed' ? 'Nailed it!' : tier === 'close' ? 'Close enough' : 'Not even close';
-
-    document.getElementById('revScore').textContent = score;
-    document.getElementById('revMax').textContent = maxScore;
-
-    // clear the transient private-answer data now that scoring is done —
-    // only the aggregate score is retained going forward.
-    pendingAnswer = null; pendingPrediction = null;
+    pendingReveal = {
+      questionId: q.id, tier, points,
+      realDisplay: real, guessDisplay: guess,
+      whoAnswered: turn, whoPredicted: otherOf(turn)
+    };
     saveState();
+    renderReveal(pendingReveal);
     show('reveal');
   }
 
+  function renderReveal(data) {
+    document.getElementById('revLabelA').textContent = `${whoLabel(data.whoAnswered)} said`;
+    document.getElementById('revValA').textContent = data.realDisplay;
+    document.getElementById('revLabelB').textContent = `${whoLabel(data.whoPredicted)} guessed`;
+    document.getElementById('revValB').textContent = data.guessDisplay;
+
+    const badge = document.getElementById('resultBadge');
+    badge.className = 'resultBadge fade-in ' + data.tier;
+    badge.textContent = data.tier === 'nailed' ? 'Nailed it!' : data.tier === 'close' ? 'Close enough' : 'Not even close';
+
+    document.getElementById('revScore').textContent = score;
+    document.getElementById('revMax').textContent = maxScore;
+  }
+
   function nextQuestion() {
+    // Leaving the reveal screen — delete the transient private answer/
+    // prediction/result data immediately, per the "don't retain private
+    // answers" requirement. Only the aggregate score survives past this point.
+    pendingAnswer = null; pendingPrediction = null; pendingReveal = null;
     turn = otherOf(turn);
     posInRound++;
     if (posInRound >= QUESTIONS_PER_ROUND) {
@@ -677,11 +755,26 @@ const App = (() => {
   }
 
   function skipQuestion() {
-    // redraw: replace current question id with another unused one from the full bank if available
+    // Replace the current question with one that has never been presented
+    // this session — checked against the full session history (roundHistory),
+    // not just the 9 currently-queued slots, so a question skipped away from
+    // earlier can't resurface later as a "new" one. Only if the entire round
+    // bank has genuinely been presented already do we allow reuse.
     const r = currentRound();
-    const usedIds = new Set(roundQuestionIds[r.key]);
-    const alt = r.questions.map(q=>q.id).find(id => !usedIds.has(id));
-    if (alt) roundQuestionIds[r.key][posInRound] = alt;
+    const bankIds = r.questions.map(q => q.id);
+    const history = roundHistory[r.key] || [];
+    let excluded = new Set(history);
+    let alt = bankIds.find(id => !excluded.has(id));
+    if (!alt) {
+      // Bank genuinely exhausted for this round this session — reset history
+      // so play can continue, preferring not to immediately repeat the exact
+      // question just skipped.
+      const currentId = roundQuestionIds[r.key][posInRound];
+      roundHistory[r.key] = [];
+      alt = bankIds.find(id => id !== currentId) || bankIds[0];
+    }
+    roundQuestionIds[r.key][posInRound] = alt;
+    roundHistory[r.key] = (roundHistory[r.key] || []).concat(alt);
     saveState();
     startAnswering();
   }
@@ -705,6 +798,13 @@ const App = (() => {
       case 'answering': startAnswering(); break;
       case 'handoffPredict': document.getElementById('hpWhat').textContent = `Pass the phone to ${whoLabel(otherOf(turn))} — no peeking.`; show('handoffPredict'); break;
       case 'predicting': startPredicting(); break;
+      case 'reveal':
+        // Redisplay the already-computed result — never recompute (that
+        // would double-count the score). validateState() already confirmed
+        // pendingReveal matches the question at this position before we got here.
+        if (pendingReveal) { renderReveal(pendingReveal); show('reveal'); }
+        else { renderRoundIntro(); } // should be unreachable given validation, but never crash
+        break;
       case 'roundEnd': renderRoundEnd(); break;
       default: renderRoundIntro();
     }
