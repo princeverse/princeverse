@@ -1,0 +1,243 @@
+/* Signal Stack — AI Sales & Marketing Tools Guide
+   Palette: deep ink navy + electric indigo, clean tech-editorial feel */
+
+@page {
+  size: letter;
+  margin: 0;
+}
+
+:root {
+  --ink: #1b2030;
+  --ink-soft: #5b6478;
+  --accent: #4f5bd5;
+  --accent-dark: #363f9c;
+  --accent-soft: #eceafd;
+  --line: #dcdfec;
+  --paper: #ffffff;
+  --bg: #f6f7fb;
+  --good: #1f9d6b;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 8.5in;
+  height: 11in;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.page {
+  width: 8.5in;
+  height: 11in;
+  padding: 0.55in 0.6in;
+  position: relative;
+  overflow: hidden;
+}
+
+.kicker {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+  font-weight: bold;
+}
+
+h1.title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 28px;
+  margin: 4px 0 2px 0;
+  color: var(--ink);
+  font-weight: normal;
+  letter-spacing: 0.2px;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+}
+
+.header-rule {
+  border: none;
+  border-top: 1.5px solid var(--accent);
+  margin: 10px 0 18px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5px;
+}
+
+th {
+  text-align: left;
+  font-weight: bold;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  color: var(--paper);
+  background: var(--accent);
+  padding: 7px 8px;
+}
+
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 7px 8px;
+  color: var(--ink);
+  vertical-align: top;
+}
+
+tr:last-child td {
+  border-bottom: 1px solid var(--accent);
+}
+
+.section-label {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  color: var(--accent-dark);
+  margin: 16px 0 6px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.two-col {
+  display: flex;
+  gap: 0.4in;
+}
+
+.two-col > div { flex: 1; }
+
+.footer {
+  position: absolute;
+  bottom: 0.4in;
+  left: 0.6in;
+  right: 0.6in;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+.badge-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 9px;
+  color: var(--accent-dark);
+  letter-spacing: 0.4px;
+}
+
+.tool-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--paper);
+}
+
+.tool-card .tool-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.tool-card .tool-name {
+  font-family: Georgia, serif;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.tool-card .tool-tag {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.tool-card .tool-desc {
+  font-size: 10.5px;
+  color: var(--ink);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.tool-card .tool-meta {
+  font-size: 9.5px;
+  color: var(--ink-soft);
+  display: flex;
+  gap: 16px;
+}
+
+.tool-card .tool-meta b { color: var(--ink); }
+
+.stat-row {
+  display: flex;
+  gap: 0.3in;
+  margin-top: 4px;
+}
+
+.stat {
+  flex: 1;
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--paper);
+}
+
+.stat .label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
+}
+
+.stat .value {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  color: var(--accent-dark);
+  margin-top: 4px;
+}
+
+.checklist div {
+  font-size: 10.5px;
+  padding: 4px 0 4px 20px;
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+
+.checklist div:before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  color: var(--good);
+  font-weight: bold;
+}
+
+.callout {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  font-size: 10.5px;
+  border-radius: 4px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.center { text-align: center; }
+.small { font-size: 9px; color: var(--ink-soft); }

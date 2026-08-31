@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
+<style>
+  .cover { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; }
+  .frame { position: absolute; top: 0.3in; left: 0.3in; right: 0.3in; bottom: 0.3in; width: calc(8.5in - 0.6in); height: calc(11in - 0.6in); border: 1.5px solid var(--accent); }
+  .frame-inner { position: absolute; top: 0.38in; left: 0.38in; right: 0.38in; bottom: 0.38in; width: calc(8.5in - 0.76in); height: calc(11in - 0.76in); border: 0.5px solid var(--line); }
+  .brand { font-family: Georgia, serif; font-size: 14px; letter-spacing: 5px; text-transform: uppercase; color: var(--accent-dark); margin-bottom: 40px; }
+  .cover h1 { font-family: Georgia, serif; font-size: 42px; font-weight: normal; margin: 0 0 8px 0; color: var(--ink); line-height: 1.2; }
+  .cover .rule { width: 90px; border-top: 1.5px solid var(--accent); margin: 16px 0; }
+  .cover .desc { font-size: 13px; color: var(--ink-soft); max-width: 4.8in; line-height: 1.7; margin-bottom: 30px; }
+  .contents { text-align: left; font-size: 11.5px; color: var(--ink); margin-top: 6px; }
+  .contents .item { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+  .contents .num { color: var(--accent); font-family: Georgia, serif; font-style: italic; }
+  .cover .foot { position: absolute; bottom: 0.7in; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="frame"></div>
+  <div class="frame-inner"></div>
+  <div class="cover">
+    <div class="brand">Signal Stack</div>
+    <h1>AI Tools for<br>Sales &amp; Marketing</h1>
+    <div class="rule"></div>
+    <div class="desc">A no-fluff buyer's guide to the AI software actually being used to find leads, enrich data, run outbound, and close more deals — what each category does, real tool examples, and how to pick your stack.</div>
+    <div class="contents">
+      <div class="item"><span class="num">01</span><span>How To Use This Guide</span></div>
+      <div class="item"><span class="num">02</span><span>Website Visitor ID &amp; Intent Data</span></div>
+      <div class="item"><span class="num">03</span><span>Data Enrichment &amp; Waterfalls</span></div>
+      <div class="item"><span class="num">04</span><span>AI SDRs &amp; Outbound Sequencing</span></div>
+      <div class="item"><span class="num">05</span><span>AI Voice &amp; Conversational Sales</span></div>
+      <div class="item"><span class="num">06</span><span>Tool Comparison At A Glance</span></div>
+      <div class="item"><span class="num">07</span><span>Build Your Stack + Resources</span></div>
+    </div>
+    <div class="foot">2026 Edition &middot; Digital PDF &middot; Instant Download</div>
+  </div>
+</div>
+</body>
+</html>
